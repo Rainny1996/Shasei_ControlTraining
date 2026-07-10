@@ -99,8 +99,8 @@ class SecurityService {
         guard let hashedPassword = hashPassword(password, salt: salt) else { return false }
         
         // 存储盐值和哈希密码到Keychain
-        let saltSaved = saveToKeychain(key: passwordSaltKey, data: salt)
-        let passwordSaved = saveToKeychain(key: passwordKey, data: hashedPassword)
+        let saltSaved = KeychainService.shared.save(data: salt, forKey: passwordSaltKey)
+        let passwordSaved = KeychainService.shared.save(data: hashedPassword, forKey: passwordKey)
         
         if saltSaved && passwordSaved {
             UserDefaults.standard.set(true, forKey: "isPasswordSet")
@@ -113,8 +113,8 @@ class SecurityService {
     /// - Parameter password: 输入的密码
     /// - Returns: 是否验证通过
     func verifyPassword(_ password: String) -> Bool {
-        guard let storedSalt = loadFromKeychain(key: passwordSaltKey),
-              let storedHash = loadFromKeychain(key: passwordKey) else {
+        guard let storedSalt = KeychainService.shared.load(forKey: passwordSaltKey),
+              let storedHash = KeychainService.shared.load(forKey: passwordKey) else {
             return false
         }
         
@@ -127,8 +127,8 @@ class SecurityService {
     
     /// 删除密码
     func removePassword() {
-        removeFromKeychain(key: passwordKey)
-        removeFromKeychain(key: passwordSaltKey)
+        KeychainService.shared.delete(forKey: passwordKey)
+        KeychainService.shared.delete(forKey: passwordSaltKey)
         UserDefaults.standard.set(false, forKey: "isPasswordSet")
     }
     

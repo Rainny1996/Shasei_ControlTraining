@@ -67,7 +67,7 @@ class DataController: ObservableObject {
     
     /// 删除所有用户数据（用于隐私保护功能）
     func deleteAllUserData() {
-        let entities = ["TrainingRecord", "CheckInRecord", "TrainingPlan", "AbilityProfile", "ReviewNote"]
+        let entities = ["CDTrainingRecord", "CDCheckInRecord", "CDTrainingPlan", "CDAbilityProfile", "CDReviewNote"]
         
         performBackgroundTask { context in
             for entityName in entities {
