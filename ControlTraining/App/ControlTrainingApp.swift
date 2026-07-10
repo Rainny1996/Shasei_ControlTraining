@@ -2,6 +2,7 @@ import SwiftUI
 
 @main
 struct ControlTrainingApp: App {
+    @UIApplicationDelegateAdaptor(AppDelegate.self) var appDelegate
     @StateObject private var appState = AppState()
     @StateObject private var dataController = DataController.shared
     

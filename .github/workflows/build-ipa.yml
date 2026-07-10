@@ -11,26 +11,41 @@ jobs:
     steps:
       - uses: actions/checkout@v4
 
-      - name: Check Xcode versions
+      - name: Check Environment
         run: |
-          echo "Default Xcode:"
+          echo "=== Xcode Version ==="
           xcodebuild -version
           echo ""
-          echo "Available Xcode versions:"
-          ls /Applications/ | grep Xcode
-
-      - name: Install XcodeGen
-        run: brew install xcodegen
+          echo "=== Available Xcode ==="
+          ls /Applications/ | grep Xcode || true
+          echo ""
+          echo "=== XcodeGen Version ==="
+          brew install xcodegen
+          xcodegen --version
 
       - name: Generate Xcode Project
         run: |
-          xcodegen generate
-          echo "Project generated. Listing files:"
-          ls -la *.xcodeproj
+          xcodegen generate --verbose 2>&1
+          echo ""
+          echo "=== Verify Project ==="
+          if [ ! -d "ControlTraining.xcodeproj" ]; then
+            echo "ERROR: ControlTraining.xcodeproj not found!"
+            echo "Files in current directory:"
+            ls -la
+            exit 1
+          fi
+          echo "Project bundle contents:"
+          ls -la ControlTraining.xcodeproj/
+          echo ""
+          echo "Project file size:"
+          wc -l ControlTraining.xcodeproj/project.pbxproj
+
+      - name: Verify Project Readable
+        run: |
+          xcodebuild -list -project ControlTraining.xcodeproj
 
       - name: Build App
         run: |
-          set -e
           xcodebuild build \
             -project ControlTraining.xcodeproj \
             -scheme ControlTraining \
@@ -43,28 +58,23 @@ jobs:
             DEVELOPMENT_TEAM="" \
             ENABLE_BITCODE=NO \
             2>&1 | tee build.log
-          echo "Build exit code: $?"
 
       - name: Debug - List build products
         if: always()
         run: |
-          echo "=== Build directory structure ==="
-          find build -type d -maxdepth 4 2>/dev/null || echo "build directory not found"
-          echo ""
           echo "=== .app files ==="
           find build -name "*.app" 2>/dev/null || echo "No .app files found"
           echo ""
-          echo "=== Products directory ==="
+          echo "=== Build products directory ==="
           ls -laR build/Build/Products/ 2>/dev/null || echo "Products directory not found"
 
       - name: Create IPA
         run: |
-          set -e
           APP_PATH=$(find build -name "ControlTraining.app" | head -1)
           if [ -z "$APP_PATH" ]; then
             echo "ERROR: Could not find ControlTraining.app"
-            echo "Checking build log for errors..."
-            grep -i "error:" build.log | head -20 || echo "No errors found in log"
+            echo "=== Build errors ==="
+            grep -i "error:" build.log | head -30 || echo "No error lines found"
             exit 1
           fi
           echo "Found app at: $APP_PATH"
@@ -82,7 +92,7 @@ jobs:
           path: ControlTraining.ipa
           retention-days: 30
 
-      - name: Upload build log
+      - name: Upload build log on failure
         uses: actions/upload-artifact@v4
         if: failure()
         with:
