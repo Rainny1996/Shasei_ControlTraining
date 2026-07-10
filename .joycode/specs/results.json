@@ -473,6 +473,51 @@
       "symbolSpecTaskKey": "spec-ejaculation-control-training-ios-12-1783683874944",
       "content": "执行任务（ejaculation-control-training-ios）: 12. 应用发布准备",
       "specTaskKey": "spec-ejaculation-control-training-ios-12-1783683874944"
+    },
+    {
+      "message": "执行任务（ejaculation-control-training-ios）: 12. 应用发布准备",
+      "status": "STOPPED",
+      "specName": "ejaculation-control-training-ios",
+      "specTaskId": "12",
+      "chatId": "task-86ffd3a8-9fbc-4581-b5bf-8fe00627dba6",
+      "id": "spec-ejaculation-control-training-ios-12-1783683874944",
+      "_t": 1783699258340
+    },
+    {
+      "message": "执行任务（ejaculation-control-training-ios）: 12. 应用发布准备",
+      "status": "STOPPED",
+      "specName": "ejaculation-control-training-ios",
+      "specTaskId": "12",
+      "chatId": "task-86ffd3a8-9fbc-4581-b5bf-8fe00627dba6",
+      "id": "spec-ejaculation-control-training-ios-12-1783683874944",
+      "_t": 1783699268620
+    },
+    {
+      "message": "执行任务（ejaculation-control-training-ios）: 12. 应用发布准备",
+      "status": "STOPPED",
+      "specName": "ejaculation-control-training-ios",
+      "specTaskId": "12",
+      "chatId": "task-86ffd3a8-9fbc-4581-b5bf-8fe00627dba6",
+      "id": "spec-ejaculation-control-training-ios-12-1783683874944",
+      "_t": 1783699269477
+    },
+    {
+      "message": "执行任务（ejaculation-control-training-ios）: 12. 应用发布准备",
+      "status": "STOPPED",
+      "specName": "ejaculation-control-training-ios",
+      "specTaskId": "12",
+      "chatId": "task-86ffd3a8-9fbc-4581-b5bf-8fe00627dba6",
+      "id": "spec-ejaculation-control-training-ios-12-1783683874944",
+      "_t": 1783699322481
+    },
+    {
+      "message": "执行任务（ejaculation-control-training-ios）: 12. 应用发布准备",
+      "status": "FINISHED",
+      "specName": "ejaculation-control-training-ios",
+      "specTaskId": "12",
+      "chatId": "task-86ffd3a8-9fbc-4581-b5bf-8fe00627dba6",
+      "id": "spec-ejaculation-control-training-ios-12-1783683874944",
+      "_t": 1783699500567
     }
   ]
 }
