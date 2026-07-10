@@ -115,6 +115,7 @@ jobs:
 
       - name: Build App
         run: |
+          set -o pipefail
           xcodebuild build \
             -project ControlTraining.xcodeproj \
             -scheme ControlTraining \

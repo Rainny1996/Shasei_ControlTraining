@@ -2,17 +2,9 @@ import Foundation
 import CoreData
 
 /// Core Data 用户实体
+/// 属性声明由 Xcode 自动生成（CDUser+CoreDataProperties.swift）
 @objc(CDUser)
 public class CDUser: NSManagedObject {
-    @NSManaged public var id: UUID
-    @NSManaged public var createdAt: Date
-    @NSManaged public var assessmentCompleted: Bool
-    @NSManaged public var name: String?
-    @NSManaged public var age: Int32
-    @NSManaged public var trainingRecords: NSSet?
-    @NSManaged public var checkInRecords: NSSet?
-    @NSManaged public var trainingPlan: CDTrainingPlan?
-    @NSManaged public var abilityProfile: CDAbilityProfile?
 }
 
 extension CDUser {

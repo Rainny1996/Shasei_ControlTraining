@@ -2,13 +2,9 @@ import Foundation
 import CoreData
 
 /// Core Data 打卡记录实体
+/// 属性声明由 Xcode 自动生成（CDCheckInRecord+CoreDataProperties.swift）
 @objc(CDCheckInRecord)
 public class CDCheckInRecord: NSManagedObject {
-    @NSManaged public var id: UUID
-    @NSManaged public var date: Date
-    @NSManaged public var checkInTime: Date
-    @NSManaged public var trainingRecordId: UUID?
-    @NSManaged public var user: CDUser?
 }
 
 extension CDCheckInRecord {

@@ -2,16 +2,9 @@ import Foundation
 import CoreData
 
 /// Core Data 计划项实体
+/// 属性声明由 Xcode 自动生成（CDPlanItem+CoreDataProperties.swift）
 @objc(CDPlanItem)
 public class CDPlanItem: NSManagedObject {
-    @NSManaged public var id: UUID
-    @NSManaged public var date: Date
-    @NSManaged public var methodId: UUID
-    @NSManaged public var methodName: String
-    @NSManaged public var duration: Double
-    @NSManaged public var isCompleted: Bool
-    @NSManaged public var completedAt: Date?
-    @NSManaged public var plan: CDTrainingPlan?
 }
 
 extension CDPlanItem {

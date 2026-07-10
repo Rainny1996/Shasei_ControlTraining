@@ -2,18 +2,9 @@ import Foundation
 import CoreData
 
 /// Core Data 训练记录实体
+/// 属性声明由 Xcode 自动生成（CDTrainingRecord+CoreDataProperties.swift）
 @objc(CDTrainingRecord)
 public class CDTrainingRecord: NSManagedObject {
-    @NSManaged public var id: UUID
-    @NSManaged public var methodId: UUID
-    @NSManaged public var date: Date
-    @NSManaged public var duration: Double
-    @NSManaged public var completionRate: Double
-    @NSManaged public var selfRating: Int16
-    @NSManaged public var notes: String?
-    @NSManaged public var mode: String
-    @NSManaged public var user: CDUser?
-    @NSManaged public var reviewNotes: NSSet?
 }
 
 extension CDTrainingRecord {

@@ -2,18 +2,9 @@ import Foundation
 import CoreData
 
 /// Core Data 能力档案实体
+/// 属性声明由 Xcode 自动生成（CDAbilityProfile+CoreDataProperties.swift）
 @objc(CDAbilityProfile)
 public class CDAbilityProfile: NSManagedObject {
-    @NSManaged public var id: UUID
-    @NSManaged public var overallScore: Int16
-    @NSManaged public var endurance: Double
-    @NSManaged public var control: Double
-    @NSManaged public var recovery: Double
-    @NSManaged public var breathCoordination: Double
-    @NSManaged public var muscleStrength: Double
-    @NSManaged public var level: String
-    @NSManaged public var lastUpdated: Date
-    @NSManaged public var user: CDUser?
 }
 
 extension CDAbilityProfile {

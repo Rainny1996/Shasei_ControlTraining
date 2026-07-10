@@ -2,16 +2,9 @@ import Foundation
 import CoreData
 
 /// Core Data 复盘笔记实体
+/// 属性声明由 Xcode 自动生成（CDReviewNote+CoreDataProperties.swift）
 @objc(CDReviewNote)
 public class CDReviewNote: NSManagedObject {
-    @NSManaged public var id: UUID
-    @NSManaged public var trainingRecordId: UUID
-    @NSManaged public var date: Date
-    @NSManaged public var feelingScore: Int16
-    @NSManaged public var difficultyScore: Int16
-    @NSManaged public var bodyReaction: String?
-    @NSManaged public var notes: String?
-    @NSManaged public var trainingRecord: CDTrainingRecord?
 }
 
 extension CDReviewNote {

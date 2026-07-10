@@ -2,20 +2,9 @@ import Foundation
 import CoreData
 
 /// Core Data 训练方法实体
+/// 属性声明由 Xcode 自动生成（CDTrainingMethod+CoreDataProperties.swift）
 @objc(CDTrainingMethod)
 public class CDTrainingMethod: NSManagedObject {
-    @NSManaged public var id: UUID
-    @NSManaged public var name: String
-    @NSManaged public var category: String
-    @NSManaged public var difficulty: String
-    @NSManaged public var methodDescription: String
-    @NSManaged public var principle: String
-    @NSManaged public var stepsData: Data?
-    @NSManaged public var precautionsData: Data?
-    @NSManaged public var expectedEffect: String
-    @NSManaged public var targetAudience: String
-    @NSManaged public var defaultDuration: Double
-    @NSManaged public var isFavorite: Bool
 }
 
 extension CDTrainingMethod {
