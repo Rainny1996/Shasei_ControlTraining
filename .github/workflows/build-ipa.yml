@@ -25,7 +25,7 @@ jobs:
 
       - name: Generate Xcode Project
         run: |
-          xcodegen generate --verbose 2>&1
+          xcodegen generate 2>&1
           echo ""
           echo "=== Verify Project ==="
           if [ ! -d "ControlTraining.xcodeproj" ]; then
