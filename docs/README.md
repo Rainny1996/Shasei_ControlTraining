@@ -10,6 +10,7 @@
 ```
 docs/
 ├── README.md              ← 你在这里
+├── BUG-TASK-ASSIGNMENT.md    — Bug 修复任务分配与状态（v0.0.2 已修复）
 │
 ├── specs/                 ← 📋 项目核心规格文档
 │   ├── requirements.md    — 需求文档（v2.0，含验收标准编号 AC-x.y）
@@ -17,7 +18,7 @@ docs/
 │   └── tasks.md           — 实现任务拆分（v2.0，绑定 AC 编号）
 │
 └── reviews/               ← 🔍 代码审查报告
-    ├── v5.7-代码复查报告.md       — 【最新】GitHub 第二次实编译失败复审：❌ 构建失败（12 错误已定位并修复本地代码，待推送重跑 CI；v5.6「Group A 已修」误判已被推翻）
+    ├── v5.9-BUG修复复查报告.md    — 【最新】用户反馈 4 项 Bug 修复源码复查：✅ 4/4 通过（#1 评估跳转 / #2 智能调整 / #3 挤压图标 / #4 密码·FaceID 冷启动），含编译验证
     ├── v4.0-测试覆盖审查报告.md   — 测试体系审查（已补测试 target/集成/UI）
     └── archive/           ← 历史审查报告（不再维护）
         ├── v3.0-代码审查报告.md         — 已失效（未经验证，被 v5.1 推翻）
@@ -43,9 +44,9 @@ docs/
 | **新加入的开发者** | README（根目录）→ `specs/requirements.md` → `specs/design.md` |
 | **架构设计 AI** | `specs/requirements.md` → `specs/design.md` |
 | **编码实现 AI** | `specs/tasks.md` → `specs/requirements.md` → 源码 `ControlTraining/` |
-| **代码审查 AI** | `reviews/v5.7-代码复查报告.md` → 以 CI 实编译日志为真相，逐条读盘核实已修/残留 |
+| **代码审查 AI** | `reviews/v5.9-BUG修复复查报告.md` → 以 CI 实编译日志为真相，逐条读盘核实已修/残留 |
 | **运维/CI AI** | `specs/requirements.md` §4（技术约束）→ `reviews/archive/IPA构建v2.0.md` → `.github/workflows/build-ipa.yml` |
-| **产品经理** | `specs/requirements.md` → UI 预览 `preview/versions/v0.0.1.html` |
+| **产品经理** | `specs/requirements.md` → UI 预览 `preview/versions/v0.0.2.html` |
 
 ---
 
@@ -56,7 +57,8 @@ docs/
 | requirements.md | v2.0 | 当前活跃 |
 | design.md | v2.0 | 对齐需求 v2.0 |
 | tasks.md | v2.0 | 对齐需求 v2.0 |
-| 审查报告 | v5.7 | ❌ 构建失败（CI 12 错误，已修复本地代码待推送重跑；v5.6「Group A 已修」误判已被推翻，v5.5 系版本错位虚假通过） |
+| 审查报告 | v5.9 | ✅ 4/4 用户反馈 Bug 修复通过（含编译验证），详见 v5.9-BUG修复复查报告.md |
+| UI 预览 | v0.0.2 | preview/versions/v0.0.2.html（液态玻璃风格 + 4 项 Bug 修复面板） |
 
 ---
 

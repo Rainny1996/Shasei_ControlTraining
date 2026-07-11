@@ -50,6 +50,7 @@ class AppState: ObservableObject {
         loadState()
         setupSecurityProtection()
         setupNotificationObservers()
+        isLocked = SecurityService.shared.isSecurityEnabled()
     }
     
     /// 设置通知观察者

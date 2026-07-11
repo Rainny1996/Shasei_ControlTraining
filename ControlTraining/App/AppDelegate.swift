@@ -21,8 +21,7 @@ class AppDelegate: NSObject, UIApplicationDelegate {
     }
     
     func applicationWillEnterForeground(_ application: UIApplication) {
-        // 进入前台时验证身份
-        SecurityService.shared.authenticateIfNeeded()
+        // 锁屏认证由 LockScreenView.onAppear 统一管理，此处不再重复调用
     }
     
     func application(_ application: UIApplication,

@@ -124,8 +124,10 @@ struct LockScreenView: View {
         }
         .onAppear {
             authMode = SecurityService.shared.getAuthMode()
-            
-            // 如果是生物识别模式，自动触发
+            guard authMode != .none else {
+                appState.isLocked = false
+                return
+            }
             if authMode == .biometric || authMode == .biometricAndPassword {
                 tryBiometricAuth()
             }

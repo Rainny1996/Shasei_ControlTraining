@@ -1,5 +1,23 @@
 # UI Preview Changelog
 
+## [v0.0.2] - 2026-07-11
+
+> 本次为 **Bug Fix 迭代版本**，基于 v0.0.1 液态玻璃风格，叠加 4 项用户反馈 Bug 修复（应用侧对应 `docs/reviews/v5.9-BUG修复复查报告.md`）。
+
+### Fixed
+- **#4（P0 安全）密码/FaceID 冷启动失效**
+  - `AppState.init()` 末尾新增 `isLocked = SecurityService.shared.isSecurityEnabled()`，冷启动正确进入锁屏
+  - `LockScreenView.onAppear` 增加 `.none` 模式自动放行（防竞态/数据异常卡死）
+  - 移除 `AppDelegate.applicationWillEnterForeground` 中冗余 `authenticateIfNeeded()`（消除双重 Face ID 弹窗）
+- **#1（P1）评估完成不跳转** — 提交评估后 sheet 自动关闭并展示已生成计划（`shouldDismiss` 驱动 `@Environment(\.dismiss)`）
+- **#2（P2）智能调整按钮失效** — `TrainingRepository.fetchRecentRecords` 实现真实 Core Data 查询，删除残留硬编码存根
+- **#3（P2）挤压技术图标空白** — SF Symbol `hand.press.fill`（iOS 19+）改为 `rectangle.compress.vertical`（iOS 15+）
+
+### Preview Files
+- `preview/versions/v0.0.2.html`（在 v0.0.1 基础上新增「本次更新」面板，原 `v0.0.1.html` 保留）
+
+---
+
 ## [v0.0.1] - 2026-07-11
 
 ### Added

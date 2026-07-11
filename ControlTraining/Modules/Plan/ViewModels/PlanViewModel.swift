@@ -229,15 +229,3 @@ class PlanViewModel: ObservableObject {
         return completedCount > 0 && completedCount < items.count
     }
 }
-
-// MARK: - TrainingRepository Extension
-
-extension TrainingRepository {
-    
-    /// 获取近期训练记录
-    func fetchRecentRecords(limit: Int = 10) -> [TrainingRecord] {
-        // 从Core Data获取最近记录
-        // 这里使用简化的实现
-        return []
-    }
-}

@@ -15,7 +15,7 @@ enum TrainingCategory: String, Codable, CaseIterable {
         switch self {
         case .kegel: return "figure.core.training"
         case .stopStart: return "pause.fill"
-        case .squeeze: return "hand.press.fill"
+        case .squeeze: return "rectangle.compress.vertical"
         case .breathing: return "wind"
         case .pelvicFloor: return "figure.stand"
         }

@@ -21,6 +21,7 @@ class AssessmentViewModel: ObservableObject {
     // MARK: - UI 状态
     @Published var isSubmitting: Bool = false
     @Published var assessmentCompleted: Bool = false
+    @Published var shouldDismiss: Bool = false
     
     // MARK: - 计算属性
     
@@ -139,6 +140,7 @@ class AssessmentViewModel: ObservableObject {
         
         isSubmitting = false
         assessmentCompleted = true
+        shouldDismiss = true
     }
     
     // MARK: - Private Methods

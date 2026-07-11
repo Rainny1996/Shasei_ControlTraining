@@ -150,6 +150,21 @@ class TrainingRepository {
         }
     }
     
+    /// 获取最近的历史训练记录
+    func fetchRecentRecords(limit: Int = 10) -> [TrainingRecord] {
+        let request: NSFetchRequest<CDTrainingRecord> = CDTrainingRecord.fetchRequest()
+        request.sortDescriptors = [NSSortDescriptor(key: "date", ascending: false)]
+        request.fetchLimit = limit
+
+        do {
+            let results = try dataController.container.viewContext.fetch(request)
+            return results.map { $0.toDomainModel() }
+        } catch {
+            print("Failed to fetch recent records: \(error)")
+            return []
+        }
+    }
+
     /// 批量导入训练方法（首次启动时使用）
     func importTrainingMethods(_ methods: [TrainingMethod]) {
         dataController.performBackgroundTask { context in

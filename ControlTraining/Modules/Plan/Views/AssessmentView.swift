@@ -58,6 +58,11 @@ struct AssessmentView: View {
                 }
             }
         }
+        .onChange(of: viewModel.shouldDismiss) { shouldDismiss in
+            if shouldDismiss {
+                dismiss()
+            }
+        }
     }
     
     // MARK: - 进度条
