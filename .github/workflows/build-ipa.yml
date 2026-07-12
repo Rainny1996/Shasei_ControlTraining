@@ -44,17 +44,14 @@ jobs:
 
           echo "=== try parsing with python pbxproj ==="
           pip3 install --quiet pbxproj 2>/dev/null || true
-          python3 -c "
+          python3 << 'PYEOF'
 import sys
-try:
-    from pbxproj import XcodeProject
-    p = XcodeProject.load('$PBXPROJ')
-    print('pbxproj parsed OK, objectVersion:', p.root_object.get('objectVersion','?'))
-    print('targets:', [t.name for t in p.objects.get_targets()])
-except Exception as e:
-    print('pbxproj parse FAILED:', str(e))
-    sys.exit(1)
-" 2>&1 || echo "=== python pbxproj parse attempt finished ==="
+from pbxproj import XcodeProject
+p = XcodeProject.load('YiLian.xcodeproj/project.pbxproj')
+print('pbxproj parsed OK, objectVersion:', p.root_object.get('objectVersion','?'))
+print('targets:', [t.name for t in p.objects.get_targets()])
+PYEOF
+          echo "=== python pbxproj parse attempt finished ==="
 
           echo "=== grep for non-ASCII in pbxproj ==="
           grep -nP '[^\x00-\x7F]' "$PBXPROJ" | head -20 || echo "(no non-ASCII found)"
