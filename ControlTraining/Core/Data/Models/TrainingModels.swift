@@ -89,6 +89,7 @@ struct TrainingMethod: Identifiable, Codable {
     var isFavorite: Bool
     let source: String?            // AC-C.2 来源标注
     let contraindication: String?  // AC-C.5 禁忌人群
+    let trainingModes: [MethodMode]  // 需求 13 / AC-13.1 方法专属模式目录
     
     init(id: UUID = UUID(),
          name: String,
@@ -103,7 +104,8 @@ struct TrainingMethod: Identifiable, Codable {
          defaultDuration: TimeInterval,
          isFavorite: Bool = false,
          source: String? = nil,
-         contraindication: String? = nil) {
+         contraindication: String? = nil,
+         trainingModes: [MethodMode] = []) {
         self.id = id
         self.name = name
         self.category = category
@@ -118,6 +120,7 @@ struct TrainingMethod: Identifiable, Codable {
         self.isFavorite = isFavorite
         self.source = source
         self.contraindication = contraindication
+        self.trainingModes = trainingModes
     }
 }
 
@@ -142,6 +145,59 @@ struct TrainingStep: Identifiable, Codable {
     }
 }
 
+// MARK: - 方法专属训练模式（需求 13 / AC-13.1~13.3）
+
+/// 单个动作步骤（数据驱动，需求 13 / AC-13.3）
+struct ModeActionStep: Identifiable, Codable {
+    let id: UUID
+    let order: Int
+    let type: TrainingActionPhase   // 收缩/放松/休息/刺激/暂停
+    let label: String               // 显示标签，如"慢缩3秒"
+    let voiceInstruction: String    // 独立语音文案，如"收缩骨盆底肌，向上向内提起，保持三秒"
+    let durationSec: Int
+    var breathInstruction: String?  // 可选呼吸引导文案，如"深吸气4秒"
+    var breathPhase: BreathPhase?   // 可选联动呼吸引导
+
+    init(id: UUID = UUID(),
+         order: Int,
+         type: TrainingActionPhase,
+         label: String,
+         voiceInstruction: String,
+         durationSec: Int,
+         breathInstruction: String? = nil,
+         breathPhase: BreathPhase? = nil) {
+        self.id = id
+        self.order = order
+        self.type = type
+        self.label = label
+        self.voiceInstruction = voiceInstruction
+        self.durationSec = durationSec
+        self.breathInstruction = breathInstruction
+        self.breathPhase = breathPhase
+    }
+}
+
+/// 方法专属训练模式（需求 13 / AC-13.1）
+struct MethodMode: Identifiable, Codable {
+    let id: UUID
+    let name: String                // 如"慢速收缩"
+    let difficulty: DifficultyLevel
+    let modeDescription: String     // 节奏要点
+    let steps: [ModeActionStep]
+
+    init(id: UUID = UUID(),
+         name: String,
+         difficulty: DifficultyLevel,
+         modeDescription: String,
+         steps: [ModeActionStep]) {
+        self.id = id
+        self.name = name
+        self.difficulty = difficulty
+        self.modeDescription = modeDescription
+        self.steps = steps
+    }
+}
+
 // MARK: - Training Record Model
 
 /// 训练记录数据模型
@@ -154,6 +210,8 @@ struct TrainingRecord: Identifiable {
     let selfRating: Int
     let notes: String
     let mode: TrainingMode
+    let modeId: UUID? = nil         // 需求 13 / AC-13.7 / AC-13.9：方法专属模式 id
+    let modeName: String? = nil       // 需求 13：方法专属模式名（聚合键）
     let isPartial: Bool     // AC-2.10: 强制退出生成的部分记录
     
     init(id: UUID = UUID(),
@@ -164,6 +222,8 @@ struct TrainingRecord: Identifiable {
          selfRating: Int = 3,
          notes: String = "",
          mode: TrainingMode = .basic,
+         modeId: UUID? = nil,
+         modeName: String? = nil,
          isPartial: Bool = false) {
         self.id = id
         self.methodId = methodId
@@ -173,6 +233,8 @@ struct TrainingRecord: Identifiable {
         self.selfRating = max(1, min(5, selfRating))
         self.notes = notes
         self.mode = mode
+        self.modeId = modeId
+        self.modeName = modeName
         self.isPartial = isPartial
     }
 }

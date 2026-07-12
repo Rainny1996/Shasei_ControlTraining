@@ -546,7 +546,7 @@ struct TrainingStepCard: View {
 struct TrainingPreparationView: View {
     let method: TrainingMethod
     @Environment(\.dismiss) private var dismiss
-    @State private var selectedMode: TrainingMode = .basic
+    @State private var selectedMethodMode: MethodMode?
     @State private var navigateToCoach = false
     
     var body: some View {
@@ -577,20 +577,22 @@ struct TrainingPreparationView: View {
             }
             .padding(.top, 20)
             
-            // 训练模式选择
-            VStack(alignment: .leading, spacing: 12) {
-                Text("选择训练模式")
-                    .font(.headline)
-                
-                ForEach(TrainingMode.allCases, id: \.self) { mode in
-                    PreparationModeCard(mode: mode, isSelected: selectedMode == mode) {
-                        withAnimation(.easeInOut(duration: 0.2)) {
-                            selectedMode = mode
+            // 方法专属训练模式选择（需求 13 / AC-13.2）
+            if !method.trainingModes.isEmpty {
+                VStack(alignment: .leading, spacing: 12) {
+                    Text("选择训练模式")
+                        .font(.headline)
+                    
+                    ForEach(method.trainingModes) { mode in
+                        PreparationModeCard(mode: mode, isSelected: selectedMethodMode?.id == mode.id) {
+                            withAnimation(.easeInOut(duration: 0.2)) {
+                                selectedMethodMode = mode
+                            }
                         }
                     }
                 }
+                .padding(.horizontal)
             }
-            .padding(.horizontal)
             
             Spacer()
             
@@ -612,8 +614,14 @@ struct TrainingPreparationView: View {
         }
         .navigationTitle("训练准备")
         .navigationBarTitleDisplayMode(.inline)
+        .onAppear {
+            // 默认选首个方法专属模式（AC-13.2）
+            if selectedMethodMode == nil {
+                selectedMethodMode = method.trainingModes.first
+            }
+        }
         .fullScreenCover(isPresented: $navigateToCoach) {
-            CoachView(initialMethod: method)
+            CoachView(initialMethod: method, initialMethodMode: selectedMethodMode)
         }
     }
 }
@@ -621,15 +629,15 @@ struct TrainingPreparationView: View {
 // MARK: - 准备页模式选择卡片
 
 struct PreparationModeCard: View {
-    let mode: TrainingMode
+    let mode: MethodMode
     let isSelected: Bool
     let action: () -> Void
     
     private var modeIcon: String {
-        switch mode {
-        case .basic: return "1.circle"
-        case .progressive: return "chart.line.uptrend.xyaxis"
-        case .interval: return "waveform.path.ecg"
+        switch mode.difficulty {
+        case .beginner: return "1.circle"
+        case .intermediate: return "chart.line.uptrend.xyaxis"
+        case .advanced: return "waveform.path.ecg"
         }
     }
     
@@ -642,11 +650,11 @@ struct PreparationModeCard: View {
                     .frame(width: 36, height: 36)
                 
                 VStack(alignment: .leading, spacing: 2) {
-                    Text(mode.rawValue)
+                    Text(mode.name)
                         .font(.subheadline)
                         .fontWeight(.medium)
                         .foregroundColor(.primary)
-                    Text(mode.description)
+                    Text(mode.modeDescription)
                         .font(.caption)
                         .foregroundColor(.secondary)
                 }

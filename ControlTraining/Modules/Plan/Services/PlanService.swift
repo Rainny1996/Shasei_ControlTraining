@@ -429,13 +429,14 @@ class PlanService {
     func draftFromTemplate(_ template: PlanTemplate) -> PlanDraft {
         let plan = generatePlanFromTemplate(template)
         let calendar = Calendar.current
-        var byDay: [Int: [UUID]] = [:]
+        // 按训练日归组为「方法 + 所选模式」选择（需求 13 / AC-13.7 透传 modeId）
+        var byDay: [Int: [MethodSelection]] = [:]
         for item in plan.items {
             let off = calendar.dateComponents([.day], from: plan.startDate, to: item.date).day ?? 0
-            byDay[off, default: []].append(item.methodId)
+            byDay[off, default: []].append(MethodSelection(methodId: item.methodId, modeId: item.modeId))
         }
         let dayDrafts = byDay.sorted(by: { $0.key < $1.key })
-            .map { DayDraft(dayOffset: $0.key, methodIds: $0.value) }
+            .map { DayDraft(dayOffset: $0.key, methodSelections: $0.value) }
         return PlanDraft(
             sourceTemplateId: template.id,
             goal: template.goal,
@@ -447,7 +448,7 @@ class PlanService {
     /// 由「我的模板」还原编辑器草稿（需求 10 / AC-10.5 复用）
     /// 直接恢复保存时的每日方法分配，而非重新生成，保证「复用」一致（Q3 兼容）
     func draftFromUserTemplate(_ ut: UserPlanTemplate) -> PlanDraft {
-        let dayDrafts = ut.days.map { DayDraft(dayOffset: $0.dayOffset, methodIds: $0.methodIds) }
+        let dayDrafts = ut.days.map { DayDraft(dayOffset: $0.dayOffset, methodSelections: $0.methodSelections) }
         return PlanDraft(
             sourceTemplateId: ut.id,
             name: ut.name,
@@ -476,13 +477,17 @@ class PlanService {
         for day in dayDrafts where (0...6).contains(day.dayOffset) {
             let date = calendar.date(byAdding: .day, value: day.dayOffset, to: startDate)!
             // Q3：同一天可分配多个方法，每个 (日, 方法) 生成一条 PlanItem
-            for methodId in day.methodIds {
-                guard let method = allMethods.first(where: { $0.id == methodId }) else { continue }
+            for selection in day.methodSelections {
+                guard let method = allMethods.first(where: { $0.id == selection.methodId }) else { continue }
+                // 需求 13 / AC-13.7：解析所选方法专属模式，透传 modeId/modeName
+                let mode = method.trainingModes.first(where: { $0.id == selection.modeId })
                 let item = PlanItem(
                     date: date,
                     methodId: method.id,
                     methodName: method.name,
-                    duration: method.defaultDuration   // AC-10.4 不暴露强度/时长，固定 defaultDuration
+                    duration: method.defaultDuration,   // AC-10.4 不暴露强度/时长，固定 defaultDuration
+                    modeId: selection.modeId,
+                    modeName: mode?.name
                 )
                 items.append(item)
             }

@@ -197,7 +197,7 @@ class PlanViewModel: ObservableObject {
     func saveCurrentDraftAsTemplate(name: String) {
         let draft = customPlanDraft
         let days = draft.dayDrafts.map {
-            UserPlanTemplateDay(dayOffset: $0.dayOffset, methodIds: $0.methodIds)
+            UserPlanTemplateDay(dayOffset: $0.dayOffset, methodSelections: $0.methodSelections)
         }
         let template = UserPlanTemplate(
             name: name,
@@ -221,7 +221,7 @@ class PlanViewModel: ObservableObject {
     /// 覆盖前二次确认由 `PlanBuilderView` 负责（明确「将替换当前计划」）。
     func generatePlanFromDraft() {
         guard !customPlanDraft.dayDrafts.isEmpty,
-              customPlanDraft.dayDrafts.contains(where: { !$0.methodIds.isEmpty }) else { return }
+              customPlanDraft.dayDrafts.contains(where: { !$0.methodSelections.isEmpty }) else { return }
         commitCustomPlan()
     }
 

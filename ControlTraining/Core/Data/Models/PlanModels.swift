@@ -62,6 +62,8 @@ struct PlanItem: Identifiable, Equatable {
     let duration: TimeInterval
     var isCompleted: Bool
     var completedAt: Date?
+    var modeId: UUID? = nil           // 需求 13 / AC-13.7：所选方法专属模式 id
+    var modeName: String? = nil         // 需求 13 / AC-13.7：所选方法专属模式名
     
     init(id: UUID = UUID(),
          date: Date,
@@ -69,7 +71,9 @@ struct PlanItem: Identifiable, Equatable {
          methodName: String,
          duration: TimeInterval,
          isCompleted: Bool = false,
-         completedAt: Date? = nil) {
+         completedAt: Date? = nil,
+         modeId: UUID? = nil,
+         modeName: String? = nil) {
         self.id = id
         self.date = date
         self.methodId = methodId
@@ -77,16 +81,34 @@ struct PlanItem: Identifiable, Equatable {
         self.duration = duration
         self.isCompleted = isCompleted
         self.completedAt = completedAt
+        self.modeId = modeId
+        self.modeName = modeName
     }
 }
 
 // MARK: - 自定义计划草稿（不落库，仅编辑器内存态）
 
+/// 训练日中单个方法的「方法 + 所选专属模式」选择（需求 13 / AC-13.7，per-method）
+struct MethodSelection: Codable, Identifiable, Hashable {
+    let methodId: UUID
+    var modeId: UUID?          // 所选方法专属模式 id（默认首个）
+    var id: UUID = UUID()
+
+    init(methodId: UUID, modeId: UUID? = nil) {
+        self.methodId = methodId
+        self.modeId = modeId
+        self.id = UUID()
+    }
+}
+
 /// 单日草稿：某个训练日及其方法（需求 10 / Q3 支持一日多方法）
 struct DayDraft: Identifiable, Hashable {
     let id: UUID = UUID()
     var dayOffset: Int        // 0...6，相对 plan.startDate 的星期偏移
-    var methodIds: [UUID]      // 该日选择的训练方法（≥1，支持多方法）
+    var methodSelections: [MethodSelection]  // 该日所选方法及其专属模式（≥1，支持多方法，Q3）
+    
+    /// 该日方法 id（派生，供兼容读取）
+    var methodIds: [UUID] { methodSelections.map { $0.methodId } }
 }
 
 /// 自定义计划编辑器内存草稿（需求 10 / AC-10.2/10.3/10.4，Q3 支持一日多方法）
@@ -130,7 +152,10 @@ struct PlanEditDraft {
 struct UserPlanTemplateDay: Codable, Identifiable, Hashable {
     let id: UUID = UUID()
     var dayOffset: Int        // 0...6
-    var methodIds: [UUID]      // 该日方法（≥1）
+    var methodSelections: [MethodSelection]  // 该日方法及其专属模式（≥1）
+    
+    /// 该日方法 id（派生，供兼容读取）
+    var methodIds: [UUID] { methodSelections.map { $0.methodId } }
 }
 
 /// 「我的模板」领域模型（需求 10 / AC-10.5）

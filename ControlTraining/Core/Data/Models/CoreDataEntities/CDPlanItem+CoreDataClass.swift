@@ -8,7 +8,7 @@ public class CDPlanItem: NSManagedObject {
 }
 
 extension CDPlanItem {
-    /// 便利初始化方法
+    /// 便利初始化方法（AC-13.7: 含 modeId/modeName 方法专属模式持久化）
     convenience init(context: NSManagedObjectContext, from item: PlanItem) {
         self.init(context: context)
         self.id = item.id
@@ -18,6 +18,8 @@ extension CDPlanItem {
         self.duration = item.duration
         self.isCompleted = item.isCompleted
         self.completedAt = item.completedAt
+        self.modeId = item.modeId
+        self.modeName = item.modeName
     }
     
     /// 转换为领域模型
@@ -29,7 +31,9 @@ extension CDPlanItem {
             methodName: methodName!,
             duration: duration,
             isCompleted: isCompleted,
-            completedAt: completedAt
+            completedAt: completedAt,
+            modeId: modeId,
+            modeName: modeName
         )
     }
 }

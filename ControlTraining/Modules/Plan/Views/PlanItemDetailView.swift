@@ -52,6 +52,7 @@ struct PlanItemDetailView: View {
                 CoachView(
                     initialMethod: method,
                     planItemId: item.id,
+                    initialMethodMode: method.trainingModes.first(where: { $0.id == item.modeId }),
                     onPlanItemComplete: {
                         planViewModel.markItemCompleted(item.id)
                     }

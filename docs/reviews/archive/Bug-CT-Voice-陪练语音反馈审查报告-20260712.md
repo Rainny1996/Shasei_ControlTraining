@@ -19,7 +19,7 @@
 ## 二、Bug 1：倒计时/进度数字卡在 3
 
 ### 现象
-进入陪练 → “准备开始”倒计时界面后，大号数字恒为 `3`，且全程不切换阶段、不进入训练视图，但底层训练逻辑其实在跑（定时器在 tick）。
+进入陪练 → "准备开始"倒计时界面后，大号数字恒为 `3`，且全程不切换阶段、不进入训练视图，但底层训练逻辑其实在跑（定时器在 tick）。
 
 ### 根因（高置信）
 `CoachViewModel` 是 `ObservableObject`，但其 `@Published` 属性（`countdownSeconds`、`sessionPhase`、`progress` 等）的变更**从未被 SwiftUI 观察到**，导致视图只渲染了初始帧。
@@ -28,11 +28,11 @@
 - `CoachView.swift:18` — `coachViewModel` 用 `@State` 持有（`@State private var coachViewModel: CoachViewModel?`）。`@State` 仅在**引用被整体替换**时触发重绘，不会响应对象内部 `@Published` 变化。
 - `CoachView.swift:27` — 把实例以普通值传入：`trainingSessionView(method: method, viewModel: viewModel)`。
 - `CoachView.swift:182` — `trainingSessionView(method: TrainingMethod, viewModel: CoachViewModel)` 形参为**普通 `let`，未加 `@ObservedObject` / `@EnvironmentObject`**。
-- `CoachView.swift:184` — `switch viewModel.sessionPhase` 只在构建时求值一次；因不被观察，`sessionPhase` 从 `.preparing` 变为 `.training` 后**界面不切换**，永远停留在“准备”页。
+- `CoachView.swift:184` — `switch viewModel.sessionPhase` 只在构建时求值一次；因不被观察，`sessionPhase` 从 `.preparing` 变为 `.training` 后**界面不切换**，永远停留在"准备"页。
 - `CoachView.swift:220` — `CountdownTimerView(seconds: viewModel.countdownSeconds)` 绑定的是未被观察的值。
 - `TrainingTimerView.swift:145` — `CountdownTimerView` 的 `seconds` 是 `let`，仅靠 `.onChange(of: seconds)`（`TrainingTimerView.swift:175`）刷新；父视图不重绘，`seconds` 永不变 → 数字恒为初始 `3`。
 
-> 结论：B1 是**纯 UI 观察缺失**缺陷。底层 `tickPreparation` / `tickTraining` 定时器正常递减，训练会“静默”完成并落库，但用户看到的是冻结在 `3` 的界面。这也解释了为何既有单测（直接断言 `vm.sessionPhase` / `countdownSeconds`）全绿——逻辑正确但视图未绑定。
+> 结论：B1 是**纯 UI 观察缺失**缺陷。底层 `tickPreparation` / `tickTraining` 定时器正常递减，训练会"静默"完成并落库，但用户看到的是冻结在 `3` 的界面。这也解释了为何既有单测（直接断言 `vm.sessionPhase` / `countdownSeconds`）全绿——逻辑正确但视图未绑定。
 
 ### 修复建议（B1）
 将 `CoachViewModel` 以可观察方式注入会话视图树，二选一：
@@ -56,13 +56,13 @@
 - `AppDelegate.swift:37-40` — 启动时正确设置了分类 `setCategory(.playback, mode: .spokenAudio, options: [.duckOthers, .allowBluetooth, .mixWithOthers])`，方向正确，但**没有配套的 `UIBackgroundModes: audio`**，后台仍会被系统挂起。
 - `AudioService.swift:122-128` — `configureBackgroundPlayback()` 仅 `setActive(true)`，未重复设置分类（分类本身会保留，这一处不是主因，但锁屏若使会话失效则恢复不全）。
 
-> 机制：声明 `UIBackgroundModes: audio` 后，系统会将“正在播放音频”的应用保持在后台运行态，主 RunLoop 与 `Timer` 继续工作，`AVSpeechSynthesizer` 的 TTS 即可在熄屏下续播（与听书/导航类 App 同机制）。
+> 机制：声明 `UIBackgroundModes: audio` 后，系统会将"正在播放音频"的应用保持在后台运行态，主 RunLoop 与 `Timer` 继续工作，`AVSpeechSynthesizer` 的 TTS 即可在熄屏下续播（与听书/导航类 App 同机制）。
 
-### 关联缺陷（B2-副）：熄屏即误存“部分记录”
+### 关联缺陷（B2-副）：熄屏即误存"部分记录"
 `CoachViewModel.swift:184-197` 监听 `UIApplication.willResignActiveNotification` 并在回调里调用 `savePartialRecordOnBackground()`（`CoachViewModel.swift:200-211`），写入 `isPartial=true` 的训练记录。
 
-- `willResignActive` 在**熄屏、切 App、来电**等场景都会触发，并非“强制退出”。
-- 后果：只要熄屏就开始训练就被标记为“中途放弃（partial）”，与 B2 期望的“熄屏继续”直接矛盾，且会产生错误统计。
+- `willResignActive` 在**熄屏、切 App、来电**等场景都会触发，并非"强制退出"。
+- 后果：只要熄屏就开始训练就被标记为"中途放弃（partial）"，与 B2 期望的"熄屏继续"直接矛盾，且会产生错误统计。
 - 建议：不要在该通知里落 partial 记录；可改为仅在确实终止（`applicationWillTerminate` / `sceneDidDiscard` 或带宽限的后台任务）时保存，或在 B2 修复后确认语音持续期间不应判定为中断。
 
 ### 修复建议（B2）
@@ -86,9 +86,23 @@
 | B2 后台模式 | `Info.plist` | P0 | 真机：陪练中熄屏，确认语音持续；重新亮屏后界面状态一致 |
 | B2-副 误存 partial | `CoachViewModel.swift:184-211` | P1 | 真机：熄屏再亮屏，确认**无**新增 `isPartial` 记录 |
 
-**额外提示**：修复 B1 后，原 `tests-需求12` 单测（直接读 `vm` 属性）仍绿，但需补**进程内 SwiftUI 集成测试 / XCUI** 才能覆盖“UI 是否随 `@Published` 刷新”——这正是计划文档中标注的 UI/真机覆盖缺口。
+**额外提示**：修复 B1 后，原 `tests-需求12` 单测（直接读 `vm` 属性）仍绿，但需补**进程内 SwiftUI 集成测试 / XCUI** 才能覆盖"UI 是否随 `@Published` 刷新"——这正是计划文档中标注的 UI/真机覆盖缺口。
 
 ---
 
 ## 五、结论
-两项反馈均为**真实缺陷且根因明确**：B1 是 `CoachViewModel` 未被 SwiftUI 观察导致的界面冻结（逻辑正常、显示卡死）；B2 是 `Info.plist` 缺失 `UIBackgroundModes: audio` 导致熄屏后台音频被系统挂起，并伴随“熄屏即写部分记录”的连带逻辑问题。两者均无需改动核心训练逻辑，修复范围小、风险低。
+两项反馈均为**真实缺陷且根因明确**：B1 是 `CoachViewModel` 未被 SwiftUI 观察导致的界面冻结（逻辑正常、显示卡死）；B2 是 `Info.plist` 缺失 `UIBackgroundModes: audio` 导致熄屏后台音频被系统挂起，并伴随"熄屏即写部分记录"的连带逻辑问题。两者均无需改动核心训练逻辑，修复范围小、风险低。
+
+---
+
+## 六、归档验证附录（2026-07-12 最终核验）
+
+> 以下核验于 `v8.0` 审查周期结束时执行，确认所有缺陷项已在当前源码中关闭。
+
+| 问题编号 | 描述 | 修复状态 | 核验证据 |
+|----------|------|----------|----------|
+| B1 | 倒计时卡在 3 | ✅ 已关闭 | `CoachSessionView` 以 `@ObservedObject` 持有 `CoachViewModel`，`CoachView.swift:239` |
+| B2 | 熄屏停语音 | ✅ 已关闭 | `Info.plist:49-52` 声明 `UIBackgroundModes: audio` |
+| B2-副 | 熄屏误存 partial | ✅ 已关闭 | `savePartialRecordOnBackground` / `willResignActiveNotification` 全仓 0 匹配 |
+
+**归档决定**：三缺陷全部确认关闭，本报告归档至 `docs/reviews/archive/`。

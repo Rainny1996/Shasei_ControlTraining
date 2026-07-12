@@ -47,7 +47,38 @@ struct TrainingContentData {
             ],
             expectedEffect: "持续练习8-12周后，可显著增强骨盆底肌力量，提升射精控制能力。研究显示，约70%的练习者在规律训练后报告控制力明显改善。同时还有助于改善尿失禁和提升性功能质量。",
             targetAudience: "所有成年男性，尤其适合初学者和骨盆底肌力量较弱者。无特殊身体条件限制，可随时随地进行练习。",
-            defaultDuration: 300
+            defaultDuration: 300,
+            trainingModes: [
+                MethodMode(
+                    name: "慢速收缩",
+                    difficulty: .beginner,
+                    modeDescription: "等长持久力",
+                    steps: [
+                        ModeActionStep(order: 1, type: .contract, label: "慢缩3秒", voiceInstruction: "收缩骨盆底肌，向上向内提起，保持三秒", durationSec: 3, breathPhase: .hold),
+                        ModeActionStep(order: 2, type: .relax, label: "放松3秒", voiceInstruction: "缓慢放松，让肌肉完全松弛", durationSec: 3, breathPhase: .hold)
+                    ]
+                ),
+                MethodMode(
+                    name: "快速收缩",
+                    difficulty: .beginner,
+                    modeDescription: "快速反应",
+                    steps: [
+                        ModeActionStep(order: 1, type: .contract, label: "快缩1秒", voiceInstruction: "快速收缩，立即提起", durationSec: 1, breathPhase: .hold),
+                        ModeActionStep(order: 2, type: .relax, label: "放松2秒", voiceInstruction: "放松，准备下一次", durationSec: 2, breathPhase: .hold)
+                    ]
+                ),
+                MethodMode(
+                    name: "阶梯式收缩",
+                    difficulty: .intermediate,
+                    modeDescription: "30%→60%→100% 阶梯",
+                    steps: [
+                        ModeActionStep(order: 1, type: .contract, label: "轻收30%", voiceInstruction: "轻度收缩，约三成力度，保持五秒", durationSec: 5, breathPhase: .hold),
+                        ModeActionStep(order: 2, type: .contract, label: "中收60%", voiceInstruction: "增加力度至六成，保持五秒", durationSec: 5, breathPhase: .hold),
+                        ModeActionStep(order: 3, type: .contract, label: "全收100%", voiceInstruction: "全力收缩，保持五秒", durationSec: 5, breathPhase: .hold),
+                        ModeActionStep(order: 4, type: .relax, label: "分阶放松", voiceInstruction: "分階段缓慢放松肌肉", durationSec: 5, breathPhase: .hold)
+                    ]
+                )
+            ]
         )
     }
     
@@ -80,7 +111,40 @@ struct TrainingContentData {
             ],
             expectedEffect: "经过4-6周的规律练习，大多数用户可以显著延长控制时间，学会更准确地感知和控制射精冲动。研究表明，停-动技术的有效率约为50-60%，配合其他训练方法效果更佳。",
             targetAudience: "有一定训练基础的男性，已掌握基本的骨盆底肌控制能力。适合能够准确感知自身兴奋度变化的用户。不建议完全没有训练经验者直接使用。",
-            defaultDuration: 600
+            defaultDuration: 600,
+            trainingModes: [
+                MethodMode(
+                    name: "标准停-动",
+                    difficulty: .intermediate,
+                    modeDescription: "刺激~2min→暂停30s→降至5级",
+                    steps: [
+                        ModeActionStep(order: 1, type: .stimulate, label: "自我刺激", voiceInstruction: "保持舒适节奏，专注感受兴奋上升", durationSec: 120, breathPhase: .inhale),
+                        ModeActionStep(order: 2, type: .pause, label: "暂停深呼吸30秒", voiceInstruction: "停止刺激，深吸气4秒，屏2秒，呼6秒", durationSec: 30, breathInstruction: "深吸气4秒，屏2秒，呼6秒", breathPhase: .inhale),
+                        ModeActionStep(order: 3, type: .stimulate, label: "重新刺激", voiceInstruction: "兴奋度下降后重新开始刺激", durationSec: 120, breathPhase: .inhale)
+                    ]
+                ),
+                MethodMode(
+                    name: "多次暂停",
+                    difficulty: .intermediate,
+                    modeDescription: "刺激1min→暂停20s",
+                    steps: [
+                        ModeActionStep(order: 1, type: .stimulate, label: "刺激1分钟", voiceInstruction: "以舒适节奏刺激一分钟", durationSec: 60, breathPhase: .inhale),
+                        ModeActionStep(order: 2, type: .pause, label: "暂停20秒", voiceInstruction: "停止刺激，深呼吸放松二十秒", durationSec: 20, breathInstruction: "深呼吸，让兴奋度下降", breathPhase: .inhale),
+                        ModeActionStep(order: 3, type: .stimulate, label: "重新刺激", voiceInstruction: "重新开始刺激", durationSec: 60, breathPhase: .inhale)
+                    ]
+                ),
+                MethodMode(
+                    name: "渐进缩短暂停",
+                    difficulty: .advanced,
+                    modeDescription: "逐步缩短暂停/延长刺激",
+                    steps: [
+                        ModeActionStep(order: 1, type: .stimulate, label: "刺激（延长）", voiceInstruction: "逐步延长刺激时间", durationSec: 100, breathPhase: .inhale),
+                        ModeActionStep(order: 2, type: .pause, label: "暂停（缩短）", voiceInstruction: "逐步缩短暂停，挑战阈值", durationSec: 25, breathInstruction: "短暂暂停，保持控制", breathPhase: .inhale),
+                        ModeActionStep(order: 3, type: .stimulate, label: "继续刺激", voiceInstruction: "进一步延长刺激", durationSec: 110, breathPhase: .inhale),
+                        ModeActionStep(order: 4, type: .pause, label: "暂停（更短）", voiceInstruction: "暂停更短，逼近极限", durationSec: 15, breathInstruction: "短暂暂停，保持控制", breathPhase: .inhale)
+                    ]
+                )
+            ]
         )
     }
     
@@ -113,7 +177,39 @@ struct TrainingContentData {
             ],
             expectedEffect: "经过4-8周规律练习，可以有效提高射精阈值，延长控制时间。研究显示挤压技术的有效率约为60-70%，略高于停-动技术。与骨盆底肌训练结合使用效果更佳。",
             targetAudience: "已掌握停-动技术基础的中级训练者。需要能够准确判断射精预感时机。有伴侣协助练习时效果更好，但也可单独练习。",
-            defaultDuration: 600
+            defaultDuration: 600,
+            trainingModes: [
+                MethodMode(
+                    name: "标准挤压",
+                    difficulty: .intermediate,
+                    modeDescription: "挤压15-20s→释放→恢复",
+                    steps: [
+                        ModeActionStep(order: 1, type: .stimulate, label: "自我刺激", voiceInstruction: "保持舒适节奏，专注感受兴奋上升", durationSec: 120, breathPhase: .inhale),
+                        ModeActionStep(order: 2, type: .pause, label: "识别临界", voiceInstruction: "兴奋度7-8级，准备挤压", durationSec: 15, breathPhase: .inhale),
+                        ModeActionStep(order: 3, type: .contract, label: "挤压15-20秒", voiceInstruction: "拇指与食指对向轻压冠状沟，适度力度，保持", durationSec: 18, breathPhase: .hold),
+                        ModeActionStep(order: 4, type: .relax, label: "释放放松", voiceInstruction: "缓慢释放压力，让兴奋度下降", durationSec: 15, breathPhase: .hold)
+                    ]
+                ),
+                MethodMode(
+                    name: "快速挤压",
+                    difficulty: .intermediate,
+                    modeDescription: "短挤压~10s",
+                    steps: [
+                        ModeActionStep(order: 1, type: .stimulate, label: "自我刺激", voiceInstruction: "保持舒适节奏刺激", durationSec: 120, breathPhase: .inhale),
+                        ModeActionStep(order: 2, type: .contract, label: "快速挤压10秒", voiceInstruction: "快速对向轻压冠状沟，保持约十秒", durationSec: 10, breathPhase: .hold),
+                        ModeActionStep(order: 3, type: .relax, label: "释放", voiceInstruction: "释放压力，放松", durationSec: 10, breathPhase: .hold)
+                    ]
+                ),
+                MethodMode(
+                    name: "轻压维持",
+                    difficulty: .advanced,
+                    modeDescription: "轻压维持抑制",
+                    steps: [
+                        ModeActionStep(order: 1, type: .stimulate, label: "自我刺激", voiceInstruction: "保持舒适节奏刺激", durationSec: 120, breathPhase: .inhale),
+                        ModeActionStep(order: 2, type: .contract, label: "轻压维持", voiceInstruction: "临界时持续轻压冠状沟，降低强度但保持", durationSec: 20, breathPhase: .hold)
+                    ]
+                )
+            ]
         )
     }
     
@@ -145,7 +241,37 @@ struct TrainingContentData {
             ],
             expectedEffect: "持续练习2-4周后，可以显著提升对呼吸模式的控制能力，在兴奋时能够快速切换到控制呼吸模式。呼吸训练的即时效果明显，可在训练过程中实时降低兴奋度。长期练习还可以减轻焦虑、改善睡眠质量。",
             targetAudience: "所有成年男性，特别适合初学者和容易焦虑紧张者。呼吸训练是最安全的入门方法，无任何身体条件限制，也适合与其他训练方法配合使用。",
-            defaultDuration: 420
+            defaultDuration: 420,
+            trainingModes: [
+                MethodMode(
+                    name: "腹式呼吸",
+                    difficulty: .beginner,
+                    modeDescription: "吸4-呼6",
+                    steps: [
+                        ModeActionStep(order: 1, type: .relax, label: "吸气4秒", voiceInstruction: "用鼻缓慢吸气，感受腹部隆起", durationSec: 4, breathInstruction: "缓慢吸气，感受腹部隆起", breathPhase: .inhale),
+                        ModeActionStep(order: 2, type: .relax, label: "呼气6秒", voiceInstruction: "缓慢呼气，感受身体放松", durationSec: 6, breathInstruction: "缓慢呼气，感受身体放松", breathPhase: .exhale)
+                    ]
+                ),
+                MethodMode(
+                    name: "4-2-6 呼吸法",
+                    difficulty: .beginner,
+                    modeDescription: "吸4-屏2-呼6",
+                    steps: [
+                        ModeActionStep(order: 1, type: .relax, label: "吸气4秒", voiceInstruction: "用鼻缓慢吸气4秒", durationSec: 4, breathInstruction: "缓慢吸气4秒", breathPhase: .inhale),
+                        ModeActionStep(order: 2, type: .rest, label: "屏气2秒", voiceInstruction: "轻轻屏住", durationSec: 2, breathInstruction: "轻轻屏住", breathPhase: .hold),
+                        ModeActionStep(order: 3, type: .relax, label: "呼气6秒", voiceInstruction: "缓慢呼气6秒", durationSec: 6, breathInstruction: "缓慢呼气6秒", breathPhase: .exhale)
+                    ]
+                ),
+                MethodMode(
+                    name: "呼吸+收缩结合",
+                    difficulty: .intermediate,
+                    modeDescription: "呼气收缩-吸气放松",
+                    steps: [
+                        ModeActionStep(order: 1, type: .contract, label: "呼气收缩3秒", voiceInstruction: "呼气同时提起盆底肌，保持三秒", durationSec: 3, breathInstruction: "呼气，同时收缩盆底肌", breathPhase: .exhale),
+                        ModeActionStep(order: 2, type: .relax, label: "吸气放松", voiceInstruction: "吸气，肌肉松开", durationSec: 3, breathInstruction: "吸气，放松盆底肌", breathPhase: .inhale)
+                    ]
+                )
+            ]
         )
     }
     
@@ -179,7 +305,49 @@ struct TrainingContentData {
             ],
             expectedEffect: "持续练习8-12周后，可以显著提升骨盆底肌的力量、耐力和协调性。快肌纤维的反应速度提升，能在射精预感出现时更快速有效地抑制反射。综合训练比基础凯格尔运动的效果更全面，研究显示综合训练可将控制时间延长2-3倍。",
             targetAudience: "已持续练习凯格尔运动4周以上的进阶训练者。需要能够准确控制骨盆底肌收缩力度和节奏。不适合初学者或骨盆底肌力量不足者直接使用。",
-            defaultDuration: 900
+            defaultDuration: 900,
+            trainingModes: [
+                MethodMode(
+                    name: "耐力训练",
+                    difficulty: .advanced,
+                    modeDescription: "10s收缩-10s放松",
+                    steps: [
+                        ModeActionStep(order: 1, type: .contract, label: "收缩保持10秒", voiceInstruction: "全力收缩，保持稳定，正常呼吸", durationSec: 10, breathPhase: .hold),
+                        ModeActionStep(order: 2, type: .relax, label: "放松10秒", voiceInstruction: "缓慢放松，准备下一次", durationSec: 10, breathPhase: .hold)
+                    ]
+                ),
+                MethodMode(
+                    name: "阶梯式收缩",
+                    difficulty: .advanced,
+                    modeDescription: "30/60/100%",
+                    steps: [
+                        ModeActionStep(order: 1, type: .contract, label: "轻收30%", voiceInstruction: "轻度收缩，约三成力度，保持五秒", durationSec: 5, breathPhase: .hold),
+                        ModeActionStep(order: 2, type: .contract, label: "中收60%", voiceInstruction: "增加力度至六成，保持五秒", durationSec: 5, breathPhase: .hold),
+                        ModeActionStep(order: 3, type: .contract, label: "全收100%", voiceInstruction: "全力收缩，保持五秒", durationSec: 5, breathPhase: .hold),
+                        ModeActionStep(order: 4, type: .relax, label: "分阶放松", voiceInstruction: "分階段缓慢放松肌肉", durationSec: 5, breathPhase: .hold)
+                    ]
+                ),
+                MethodMode(
+                    name: "快速反射",
+                    difficulty: .advanced,
+                    modeDescription: "1s快收-2s放松×20",
+                    steps: [
+                        ModeActionStep(order: 1, type: .contract, label: "快收1秒", voiceInstruction: "快速全力收缩", durationSec: 1, breathPhase: .hold),
+                        ModeActionStep(order: 2, type: .relax, label: "放松2秒", voiceInstruction: "放松，准备下一次", durationSec: 2, breathPhase: .hold)
+                    ]
+                ),
+                MethodMode(
+                    name: "功能性模拟",
+                    difficulty: .advanced,
+                    modeDescription: "模拟兴奋上升-全力收缩-放松",
+                    steps: [
+                        ModeActionStep(order: 1, type: .contract, label: "轻收30%", voiceInstruction: "轻度收缩，约三成力度", durationSec: 5, breathPhase: .hold),
+                        ModeActionStep(order: 2, type: .contract, label: "升至60%", voiceInstruction: "增加力度至六成", durationSec: 5, breathPhase: .hold),
+                        ModeActionStep(order: 3, type: .contract, label: "模拟临界全收", voiceInstruction: "模拟兴奋上升，全力收缩保持五秒", durationSec: 5, breathPhase: .hold),
+                        ModeActionStep(order: 4, type: .relax, label: "缓慢放松", voiceInstruction: "缓慢放松肌肉", durationSec: 5, breathPhase: .hold)
+                    ]
+                )
+            ]
         )
     }
 }

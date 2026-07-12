@@ -20,12 +20,16 @@ enum TrainingActionPhase {
     case contract     // 收缩
     case relax        // 放松
     case rest         // 休息
+    case stimulate    // 刺激（需求 13：停-动/挤压的自我刺激阶段）
+    case pause        // 临界暂停（需求 13：停-动/挤压的暂停抑制阶段）
     
     var displayText: String {
         switch self {
         case .contract: return "收缩"
         case .relax: return "放松"
         case .rest: return "休息"
+        case .stimulate: return "刺激"
+        case .pause: return "暂停"
         }
     }
     
@@ -34,6 +38,8 @@ enum TrainingActionPhase {
         case .contract: return "收缩骨盆底肌，保持力量"
         case .relax: return "缓慢放松肌肉"
         case .rest: return "充分休息，准备下一组"
+        case .stimulate: return "专注感受兴奋上升"
+        case .pause: return "停止刺激，深呼吸放松"
         }
     }
 }
@@ -48,8 +54,11 @@ class CoachViewModel: ObservableObject {
     /// 当前训练方法
     let method: TrainingMethod
     
-    /// 当前训练模式
+    /// 当前训练模式（遗留全局枚举，兼容旧入口）
     @Published var trainingMode: TrainingMode
+    
+    /// 当前所选「方法专属模式」（需求 13 / AC-13.2 / AC-13.4），nil 时回退 trainingMode 三分支
+    @Published var selectedMethodMode: MethodMode?
     
     /// 会话阶段
     @Published var sessionPhase: TrainingSessionPhase = .preparing
@@ -102,6 +111,7 @@ class CoachViewModel: ObservableObject {
     private var timer: Timer?
     private var audioService: AudioService
     private var trainingRepository: TrainingRepository
+    private var voiceGuideService: VoiceGuideService = .shared
     private var cancellables = Set<AnyCancellable>()
     
     /// 当前模式的阶段配置
@@ -115,16 +125,21 @@ class CoachViewModel: ObservableObject {
         let duration: Int        // 秒
         let breathPhase: BreathPhase
         let breathDuration: Int  // 秒
+        let instruction: String    // 逐动作语音文案（MethodMode 步骤 voiceInstruction）
+        let label: String          // 显示标签（MethodMode 步骤 label）
+        let modeStep: ModeActionStep?  // 来源步骤（用于逐动作语音；遗留路径为 nil）
     }
     
     // MARK: - Initialization
     
     init(method: TrainingMethod,
          mode: TrainingMode = .basic,
+         initialMethodMode: MethodMode? = nil,
          audioService: AudioService = .shared,
          trainingRepository: TrainingRepository? = nil) {
         self.method = method
         self.trainingMode = mode
+        self.selectedMethodMode = initialMethodMode
         self.totalDuration = Int(method.defaultDuration)
         self.audioService = audioService
         self.trainingRepository = trainingRepository ?? TrainingRepository()
@@ -184,16 +199,49 @@ class CoachViewModel: ObservableObject {
     private func generatePhaseSequence() {
         phaseSequence.removeAll()
         
-        switch trainingMode {
-        case .basic:
-            generateBasicPhases()
-        case .progressive:
-            generateProgressivePhases()
-        case .interval:
-            generateIntervalPhases()
+        if let mode = selectedMethodMode {
+            generateMethodModePhases(mode)
+        } else {
+            switch trainingMode {
+            case .basic:
+                generateBasicPhases()
+            case .progressive:
+                generateProgressivePhases()
+            case .interval:
+                generateIntervalPhases()
+            }
         }
         
         totalCycles = phaseSequence.count
+    }
+    
+    /// 需求 13（AC-13.4 / AC-13.5）：由所选 MethodMode.steps 循环铺满 defaultDuration 生成阶段序列。
+    /// 每步携带独立 voiceInstruction / label / breathPhase，天然实现「逐动作语音」。
+    private func generateMethodModePhases(_ mode: MethodMode) {
+        let steps = mode.steps
+        guard !steps.isEmpty else {
+            generateBasicPhases()
+            return
+        }
+        var elapsed = 0
+        while elapsed < totalDuration {
+            for step in steps {
+                if elapsed >= totalDuration { break }
+                let actual = min(step.durationSec, totalDuration - elapsed)
+                guard actual > 0 else { continue }
+                let breath = step.breathPhase ?? .hold
+                phaseSequence.append(PhaseConfig(
+                    action: step.type,
+                    duration: actual,
+                    breathPhase: breath,
+                    breathDuration: breathDuration(for: breath),
+                    instruction: step.voiceInstruction,
+                    label: step.label,
+                    modeStep: step
+                ))
+                elapsed += actual
+            }
+        }
     }
     
     /// 基础模式：等长收缩-放松循环
@@ -302,6 +350,7 @@ class CoachViewModel: ObservableObject {
             phaseRemainingSeconds = firstPhase.duration
             breathPhase = firstPhase.breathPhase
             breathRemainingSeconds = firstPhase.breathDuration
+            announceCurrentPhase()
         }
         
         if voiceGuidanceEnabled {
@@ -373,11 +422,6 @@ class CoachViewModel: ObservableObject {
         phaseRemainingSeconds -= 1
         breathRemainingSeconds -= 1
         
-        // 语音提示当前阶段
-        if voiceGuidanceEnabled && phaseRemainingSeconds == 0 {
-            announcePhaseTransition()
-        }
-        
         // 动作阶段切换
         if phaseRemainingSeconds <= 0 {
             completedCycles += 1
@@ -395,6 +439,9 @@ class CoachViewModel: ObservableObject {
             phaseRemainingSeconds = nextPhase.duration
             breathPhase = nextPhase.breathPhase
             breathRemainingSeconds = nextPhase.breathDuration
+            
+            // 逐动作语音（需求 13 / AC-13.4）
+            announceCurrentPhase()
         }
         
         // 呼吸阶段切换（在动作阶段内）
@@ -417,6 +464,8 @@ class CoachViewModel: ObservableObject {
         case .contract: return .hold
         case .relax: return .exhale
         case .rest: return .hold
+        case .stimulate: return .inhale
+        case .pause: return .inhale
         }
     }
     
@@ -429,7 +478,7 @@ class CoachViewModel: ObservableObject {
         }
     }
     
-    /// 语音播报阶段切换
+    /// 语音播报阶段切换（遗留 TrainingMode 路径）
     private func announcePhaseTransition() {
         guard voiceGuidanceEnabled else { return }
         
@@ -440,6 +489,20 @@ class CoachViewModel: ObservableObject {
             audioService.announceRelax()
         case .rest:
             audioService.announceRest()
+        case .stimulate, .pause:
+            // 逐动作语音已在阶段切换时播报（announceCurrentPhase），此处不再重复
+            break
+        }
+    }
+    
+    /// 播报当前阶段（需求 13 / AC-13.4）：方法模式步骤取其 voiceInstruction，遗留路径取阶段通用文案。
+    private func announceCurrentPhase() {
+        guard voiceGuidanceEnabled, currentPhaseIndex < phaseSequence.count else { return }
+        let cfg = phaseSequence[currentPhaseIndex]
+        if let step = cfg.modeStep {
+            voiceGuideService.announceActionInstruction(step)
+        } else {
+            voiceGuideService.announceActionInstruction(cfg.action)
         }
     }
     
@@ -473,6 +536,8 @@ class CoachViewModel: ObservableObject {
             selfRating: 3,
             notes: "训练中途结束（用户主动结束）",
             mode: trainingMode,
+            modeId: selectedMethodMode?.id,
+            modeName: selectedMethodMode?.name,
             isPartial: true
         )
         lastTrainingRecordId = record.id
@@ -487,7 +552,9 @@ class CoachViewModel: ObservableObject {
             completionRate: completionRate,
             selfRating: 3,  // 默认评分，用户可在复盘时修改
             notes: "",
-            mode: trainingMode
+            mode: trainingMode,
+            modeId: selectedMethodMode?.id,
+            modeName: selectedMethodMode?.name
         )
         lastTrainingRecordId = record.id
         trainingRepository.saveTrainingRecord(record)
@@ -521,6 +588,18 @@ class CoachViewModel: ObservableObject {
         let totalPhaseDuration = phaseSequence[currentPhaseIndex].duration
         guard totalPhaseDuration > 0 else { return 1.0 }
         return 1.0 - Double(phaseRemainingSeconds) / Double(totalPhaseDuration)
+    }
+    
+    /// 当前动作阶段显示标签（需求 13：优先取所选模式步骤 label）
+    var currentPhaseLabel: String {
+        guard currentPhaseIndex < phaseSequence.count else { return actionPhase.displayText }
+        return phaseSequence[currentPhaseIndex].label
+    }
+    
+    /// 当前动作阶段语音/说明文案（需求 13：优先取所选模式步骤 instruction）
+    var currentPhaseInstruction: String {
+        guard currentPhaseIndex < phaseSequence.count else { return actionPhase.instruction }
+        return phaseSequence[currentPhaseIndex].instruction
     }
     
     /// 呼吸引导文本

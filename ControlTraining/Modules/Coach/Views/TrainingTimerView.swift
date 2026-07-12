@@ -193,6 +193,8 @@ extension TrainingActionPhase {
         case .contract: return .blue
         case .relax: return .green
         case .rest: return .orange
+        case .stimulate: return .purple
+        case .pause: return .yellow
         }
     }
 }

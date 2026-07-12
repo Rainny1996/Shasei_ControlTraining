@@ -360,6 +360,87 @@ class AnalysisService {
         return recommendations.filter { seen.insert($0.0).inserted }
     }
     
+    // MARK: - 按训练模式聚合（需求 13 / AC-13.9）
+    
+    /// 解析训练记录的模式名称（优先 modeName，空则回退 mode.rawValue）
+    /// - Parameter record: 训练记录
+    /// - Returns: 用于聚合的模式名称
+    func resolveModeName(_ record: TrainingRecord) -> String {
+        if let name = record.modeName, !name.isEmpty { return name }
+        return record.mode.rawValue
+    }
+    
+    /// 按模式名称聚合的训练统计数据
+    struct ModeStatistics: Identifiable {
+        public let id = UUID()
+        public let modeName: String
+        public let recordCount: Int
+        public let totalDuration: TimeInterval
+        public let avgCompletionRate: Double
+        public let avgSelfRating: Double
+    }
+    
+    /// 按模式名称聚合训练记录（近 30 天滚动窗口）
+    /// - Returns: 按模式名分组的统计数据，按记录数降序
+    func fetchModeStatistics() -> [ModeStatistics] {
+        let calendar = Calendar.current
+        let now = Date()
+        let recentPeriod = calendar.date(byAdding: .day, value: -30, to: now) ?? now
+        let records = trainingRepository.fetchTrainingRecords(from: recentPeriod, to: now)
+        
+        guard !records.isEmpty else { return [] }
+        
+        // 按 resolveModeName 分组
+        var grouped: [String: [TrainingRecord]] = [:]
+        for record in records {
+            let key = resolveModeName(record)
+            grouped[key, default: []].append(record)
+        }
+        
+        // 计算每组统计
+        return grouped.map { (modeName, group) in
+            let totalDuration = group.reduce(0) { $0 + $1.duration }
+            let avgCompletion = group.map(\.completionRate).reduce(0, +) / Double(group.count)
+            let avgRating = Double(group.map(\.selfRating).reduce(0, +)) / Double(group.count)
+            return ModeStatistics(
+                modeName: modeName,
+                recordCount: group.count,
+                totalDuration: totalDuration,
+                avgCompletionRate: avgCompletion,
+                avgSelfRating: avgRating
+            )
+        }
+        .sorted { $0.recordCount > $1.recordCount }
+    }
+    
+    /// 按模式名称聚合的训练频率（按天聚合，近 30 天）
+    /// - Returns: 每种模式在各训练日的记录数
+    func fetchModeFrequency() -> [(modeName: String, date: Date, count: Int)] {
+        let calendar = Calendar.current
+        let now = Date()
+        let recentPeriod = calendar.date(byAdding: .day, value: -30, to: now) ?? now
+        let records = trainingRepository.fetchTrainingRecords(from: recentPeriod, to: now)
+        
+        guard !records.isEmpty else { return [] }
+        
+        var result: [(modeName: String, date: Date, count: Int)] = []
+        var dayMode: [String: [Date: Int]] = [:]  // modeName -> [dateStartOfDay: count]
+        
+        for record in records {
+            let key = resolveModeName(record)
+            let day = calendar.startOfDay(for: record.date)
+            dayMode[key, default: [:]][day, default: 0] += 1
+        }
+        
+        for (mode, days) in dayMode {
+            for (date, count) in days {
+                result.append((modeName: mode, date: date, count: count))
+            }
+        }
+        
+        return result.sorted { $0.date > $1.date }
+    }
+    
     // MARK: - 历史评分趋势
     
     /// 获取历史评分趋势数据

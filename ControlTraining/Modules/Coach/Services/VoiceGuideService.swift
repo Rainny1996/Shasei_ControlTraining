@@ -80,6 +80,12 @@ class VoiceGuideService {
         guard isEnabled else { return }
         speak(phase.instruction)
     }
+
+    /// 播报逐动作步骤指令（需求 13 / AC-13.4，替代通用"收缩/放松/休息"）
+    func announceActionInstruction(_ step: ModeActionStep) {
+        guard isEnabled else { return }
+        speak(step.voiceInstruction)
+    }
     
     /// 播报呼吸引导
     func announceBreathPhase(_ phase: BreathPhase) {

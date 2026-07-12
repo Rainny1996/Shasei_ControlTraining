@@ -9,10 +9,13 @@ struct CoachView: View {
     /// 关联的计划项 id（需求 12：从今日动作直达陪练时传入）
     var planItemId: UUID? = nil
     
+    /// 预选的方法专属模式（需求 13 / AC-13.6，从计划项/模板带入）
+    var initialMethodMode: MethodMode? = nil
+    
     /// 自然完成（生成非 partial 记录）后的回调（需求 12 / AC-12.4）
     var onPlanItemComplete: (() -> Void)? = nil
     
-    @State private var selectedMode: TrainingMode = .basic
+    @State private var selectedMethodMode: MethodMode?
     @State private var selectedMethod: TrainingMethod?
     @State private var isTraining = false
     @State private var coachViewModel: CoachViewModel?
@@ -26,7 +29,8 @@ struct CoachView: View {
                 if let method = selectedMethod, isTraining, let viewModel = coachViewModel {
                     CoachSessionView(
                         method: method,
-                        mode: selectedMode,
+                        mode: .basic,
+                        methodMode: selectedMethodMode,
                         viewModel: viewModel,
                         onCancel: cancelTraining,
                         onReset: resetTraining
@@ -49,6 +53,10 @@ struct CoachView: View {
         .onAppear {
             if let method = initialMethod {
                 selectedMethod = method
+            }
+            // 预选方法专属模式（AC-13.6）：优先外部带入，否则默认首个
+            if selectedMethodMode == nil {
+                selectedMethodMode = initialMethodMode ?? selectedMethod?.trainingModes.first
             }
         }
     }
@@ -89,7 +97,7 @@ struct CoachView: View {
                     .font(.headline)
             }
             
-            if trainingViewModel.filteredMethods.isEmpty {
+                if trainingViewModel.filteredMethods.isEmpty {
                 // 加载中
                 ProgressView()
                     .frame(maxWidth: .infinity)
@@ -102,6 +110,8 @@ struct CoachView: View {
                         isSelected: selectedMethod?.id == method.id
                     ) {
                         selectedMethod = method
+                        // 切换方法时重置为该方法首个专属模式（AC-13.2）
+                        selectedMethodMode = method.trainingModes.first
                     }
                 }
             }
@@ -121,11 +131,19 @@ struct CoachView: View {
                 Text("选择训练模式")
                     .font(.headline)
             }
-            
-            ForEach(TrainingMode.allCases, id: \.self) { mode in
-                ModeSelectionCard(mode: mode, isSelected: selectedMode == mode) {
-                    withAnimation(.easeInOut(duration: 0.2)) {
-                        selectedMode = mode
+
+            let modes = selectedMethod?.trainingModes ?? []
+            if modes.isEmpty {
+                Text("该方法暂无专属训练模式")
+                    .font(.subheadline)
+                    .foregroundColor(.secondary)
+            } else {
+                ForEach(modes) { mode in
+                    ModeSelectionCard(mode: mode,
+                                   isSelected: selectedMethodMode?.id == mode.id) {
+                        withAnimation(.easeInOut(duration: 0.2)) {
+                            selectedMethodMode = mode
+                        }
                     }
                 }
             }
@@ -182,8 +200,10 @@ struct CoachView: View {
     private func startTraining() {
         guard let method = selectedMethod else { return }
         
-        // 创建ViewModel
-        let viewModel = CoachViewModel(method: method, mode: selectedMode)
+        // 创建ViewModel（带入方法专属模式，需求 13 / AC-13.2 / AC-13.6）
+        let viewModel = CoachViewModel(method: method,
+                                          mode: .basic,
+                                          initialMethodMode: selectedMethodMode)
         viewModel.onTrainingCompleted = onPlanItemComplete
         coachViewModel = viewModel
         isTraining = true
@@ -215,6 +235,7 @@ struct CoachView: View {
 struct CoachSessionView: View {
     let method: TrainingMethod
     let mode: TrainingMode
+    let methodMode: MethodMode?
     @ObservedObject var viewModel: CoachViewModel
     var onCancel: () -> Void
     var onReset: () -> Void
@@ -259,7 +280,7 @@ struct CoachSessionView: View {
                     .font(.title2)
                     .fontWeight(.bold)
 
-                Text(mode.rawValue)
+                Text(methodMode?.name ?? mode.rawValue)
                     .font(.subheadline)
                     .foregroundColor(.secondary)
             }
@@ -341,7 +362,7 @@ struct CoachSessionView: View {
                 Text(method.name)
                     .font(.subheadline)
                     .fontWeight(.medium)
-                Text(mode.rawValue)
+                Text(methodMode?.name ?? mode.rawValue)
                     .font(.caption)
                     .foregroundColor(.secondary)
             }
@@ -364,8 +385,8 @@ struct CoachSessionView: View {
 
     private var actionInstructionView: some View {
         VStack(spacing: 8) {
-            // 当前阶段指令
-            Text(viewModel.actionPhase.instruction)
+            // 当前阶段指令（逐动作语音文案，AC-13.4 / AC-13.5）
+            Text(viewModel.currentPhaseInstruction)
                 .font(.body)
                 .foregroundColor(.primary)
                 .multilineTextAlignment(.center)
@@ -376,7 +397,7 @@ struct CoachSessionView: View {
                     .fill(viewModel.actionPhase.color)
                     .frame(width: 8, height: 8)
 
-                Text(viewModel.actionPhase.displayText)
+                Text(viewModel.currentPhaseLabel)
                     .font(.subheadline)
                     .fontWeight(.medium)
                     .foregroundColor(viewModel.actionPhase.color)
@@ -443,8 +464,10 @@ struct CoachSessionView: View {
         }
         .padding(.vertical, 16)
         .padding(.bottom, 8)
-        .background(Color(.systemBackground))
-        .shadow(color: .black.opacity(0.05), radius: -4, y: -2)
+        .background(.ultraThinMaterial)
+        .overlay(alignment: .top) {
+            Divider().opacity(0.15)
+        }
     }
 
     // MARK: - 暂停视图
@@ -612,7 +635,7 @@ struct CoachSessionView: View {
                 Divider()
                     .frame(height: 40)
 
-                statItem(icon: "slider.horizontal.3", title: "模式", value: mode.rawValue)
+                statItem(icon: "slider.horizontal.3", title: "模式", value: methodMode?.name ?? mode.rawValue)
             }
             .padding(.vertical, 8)
         }
@@ -695,10 +718,10 @@ struct MethodSelectionCard: View {
     }
 }
 
-// MARK: - 模式选择卡片（保留原有设计）
+// MARK: - 模式选择卡片（方法专属模式，需求 13 / AC-13.2）
 
 struct ModeSelectionCard: View {
-    let mode: TrainingMode
+    let mode: MethodMode
     let isSelected: Bool
     let action: () -> Void
     
@@ -709,11 +732,14 @@ struct ModeSelectionCard: View {
                     HStack(spacing: 8) {
                         Image(systemName: modeIcon)
                             .foregroundColor(isSelected ? .accentColor : .secondary)
-                        Text(mode.rawValue)
+                        Text(mode.name)
                             .font(.subheadline)
                             .fontWeight(.medium)
+                        Text(mode.difficulty.rawValue)
+                            .font(.caption2)
+                            .foregroundColor(.secondary)
                     }
-                    Text(mode.description)
+                    Text(mode.modeDescription)
                         .font(.caption)
                         .foregroundColor(.secondary)
                 }
@@ -735,10 +761,10 @@ struct ModeSelectionCard: View {
     }
     
     private var modeIcon: String {
-        switch mode {
-        case .basic: return "1.circle"
-        case .progressive: return "chart.line.uptrend.xyaxis"
-        case .interval: return "waveform.path.ecg"
+        switch mode.difficulty {
+        case .beginner: return "1.circle"
+        case .intermediate: return "chart.line.uptrend.xyaxis"
+        case .advanced: return "waveform.path.ecg"
         }
     }
 }

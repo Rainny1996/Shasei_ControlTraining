@@ -16,6 +16,11 @@ class AnalysisViewModel: ObservableObject {
     @Published var selectedDimension: AbilityDimension? = nil
     @Published var dimensionTrend: [DailyScore] = []
     
+    /// 按模式分组的统计数据（需求 13 / AC-13.9）
+    @Published var modeStatistics: [AnalysisService.ModeStatistics] = []
+    /// 按模式的训练频率数据（需求 13 / AC-13.9）
+    @Published var modeFrequency: [(modeName: String, date: Date, count: Int)] = []
+    
     @Published var isLoading: Bool = false
     @Published var errorMessage: String? = nil
     
@@ -59,6 +64,10 @@ class AnalysisViewModel: ObservableObject {
         if let dimension = selectedDimension {
             dimensionTrend = analysisService.fetchDimensionTrend(dimension: dimension, days: 30)
         }
+        
+        // 按模式聚合统计（需求 13 / AC-13.9）
+        modeStatistics = analysisService.fetchModeStatistics()
+        modeFrequency = analysisService.fetchModeFrequency()
         
         isLoading = false
     }

@@ -31,6 +31,11 @@ struct AnalysisView: View {
                 
                 // 推荐训练
                 recommendationsCard
+                
+                // 按训练模式统计（需求 13 / AC-13.9）
+                if !viewModel.modeStatistics.isEmpty {
+                    modeStatisticsCard
+                }
             }
             .padding()
         }
@@ -346,7 +351,83 @@ struct AnalysisView: View {
         .shadow(color: .black.opacity(0.05), radius: 8, y: 2)
     }
     
+    // MARK: - 按模式统计卡片（需求 13 / AC-13.9）
+    
+    private var modeStatisticsCard: some View {
+        VStack(spacing: 12) {
+            HStack {
+                Image(systemName: "chart.bar.doc.horizontal.fill")
+                    .foregroundColor(.teal)
+                Text("训练模式统计")
+                    .font(.headline)
+                Spacer()
+                Text("近30天")
+                    .font(.caption)
+                    .foregroundColor(.secondary)
+            }
+            
+            ForEach(viewModel.modeStatistics) { stat in
+                VStack(spacing: 8) {
+                    HStack {
+                        Text(stat.modeName)
+                            .font(.subheadline)
+                            .fontWeight(.semibold)
+                        Spacer()
+                        Text("\(stat.recordCount) 次")
+                            .font(.subheadline)
+                            .fontWeight(.medium)
+                            .foregroundColor(.accentColor)
+                    }
+                    
+                    HStack(spacing: 16) {
+                        // 总时长
+                        Label(
+                            title: { Text(formatDuration(stat.totalDuration)).font(.caption2) },
+                            icon: { Image(systemName: "clock").font(.caption2) }
+                        )
+                        .foregroundColor(.secondary)
+                        
+                        // 平均完成率
+                        Label(
+                            title: { Text("\(Int(stat.avgCompletionRate * 100))%").font(.caption2) },
+                            icon: { Image(systemName: "checkmark.circle").font(.caption2) }
+                        )
+                        .foregroundColor(stat.avgCompletionRate >= 0.8 ? .green : .orange)
+                        
+                        Spacer()
+                        
+                        // 平均自评
+                        Label(
+                            title: { Text(String(format: "%.1f", stat.avgSelfRating)).font(.caption2) },
+                            icon: { Image(systemName: "star").font(.caption2) }
+                        )
+                        .foregroundColor(.secondary)
+                    }
+                }
+                .padding(.vertical, 6)
+                
+                if stat.id != viewModel.modeStatistics.last?.id {
+                    Divider()
+                }
+            }
+        }
+        .padding()
+        .background(Color(.systemBackground))
+        .cornerRadius(16)
+        .shadow(color: .black.opacity(0.05), radius: 8, y: 2)
+    }
+    
     // MARK: - Helper Methods
+    
+    private func formatDuration(_ duration: TimeInterval) -> String {
+        let totalMinutes = Int(duration / 60)
+        if totalMinutes >= 60 {
+            let hours = totalMinutes / 60
+            let mins = totalMinutes % 60
+            return "\(hours)h\(mins)m"
+        }
+        return "\(totalMinutes)分钟"
+    }
     
     private func colorForName(_ name: String) -> Color {
         switch name {

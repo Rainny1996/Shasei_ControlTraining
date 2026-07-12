@@ -14,7 +14,8 @@ struct PlanBuilderView: View {
     // 每日方法选择 sheet 状态
     @State private var showMethodPicker = false
     @State private var editingDayId: UUID?
-    @State private var tempSelectedMethods: Set<UUID> = []
+    // 每方法所选专属模式：methodId -> modeId（默认首个，AC-13.7）
+    @State private var tempSelections: [UUID: UUID?] = [:]
     @State private var showOverwriteConfirm = false
 
     private var draft: Binding<PlanDraft> { $viewModel.customPlanDraft }
@@ -257,13 +258,18 @@ struct PlanBuilderView: View {
                         }
                         .accessibilityLabel("为\(weekdayNames[day.dayOffset])设置训练方法")
                     }
-                    if day.methodIds.isEmpty {
+                    if day.methodSelections.isEmpty {
                         Text("未选择方法")
                             .font(.caption)
                             .foregroundColor(.secondary)
                     } else {
-                        let names = day.methodIds.compactMap { id in
-                            TrainingContentData.allTrainingMethods().first(where: { $0.id == id })?.name
+                        let names = day.methodSelections.compactMap { sel in
+                            guard let m = TrainingContentData.allTrainingMethods().first(where: { $0.id == sel.methodId }) else { return nil }
+                            // 展示「方法名 · 所选专属模式」（AC-13.7）
+                            let modeName = sel.modeId.flatMap { mid in
+                                m.trainingModes.first(where: { $0.id == mid })?.name
+                            }
+                            return modeName.map { "\(m.name) · \($0)" } ?? m.name
                         }
                         Text(names.joined(separator: "、"))
                             .font(.caption)
@@ -298,7 +304,7 @@ struct PlanBuilderView: View {
             }
             .accessibilityLabel("保存为我的模板")
 
-            let hasMethod = viewModel.customPlanDraft.dayDrafts.contains(where: { !$0.methodIds.isEmpty })
+            let hasMethod = viewModel.customPlanDraft.dayDrafts.contains(where: { !$0.methodSelections.isEmpty })
             Button(action: { generate() }) {
                 HStack {
                     Image(systemName: "checkmark.circle")
@@ -401,21 +407,53 @@ struct PlanBuilderView: View {
 
     private var methodPickerSheet: some View {
         NavigationStack {
-            List(TrainingContentData.allTrainingMethods()) { method in
-                Button(action: { toggleTempMethod(method.id) }) {
-                    HStack {
-                        Text(method.name)
-                        Spacer()
-                        if tempSelectedMethods.contains(method.id) {
-                            Image(systemName: "checkmark")
-                                .foregroundColor(.accentColor)
+            List {
+                Section("选择训练方法（可多选）") {
+                    ForEach(TrainingContentData.allTrainingMethods()) { method in
+                        Button(action: { toggleTempMethod(method) }) {
+                            HStack {
+                                Text(method.name)
+                                Spacer()
+                                if tempSelections.keys.contains(method.id) {
+                                    Image(systemName: "checkmark")
+                                        .foregroundColor(.accentColor)
+                                }
+                            }
+                            .accessibilityLabel("\(method.name) \(tempSelections.keys.contains(method.id) ? "已选" : "未选")")
+                        }
+                        .buttonStyle(.plain)
+                    }
+                }
+                // 已选方法可分别指定专属模式（默认首个，AC-13.7）
+                if !tempSelections.isEmpty {
+                    Section("已选方法的训练模式（默认首个，可调整）") {
+                        ForEach(TrainingContentData.allTrainingMethods().filter { tempSelections.keys.contains($0.id) }) { method in
+                            VStack(alignment: .leading, spacing: 6) {
+                                Text(method.name)
+                                    .font(.subheadline)
+                                    .fontWeight(.medium)
+                                if method.trainingModes.isEmpty {
+                                    Text("暂无专属模式")
+                                        .font(.caption)
+                                        .foregroundColor(.secondary)
+                                } else {
+                                    Picker("模式", selection: Binding(
+                                        get: { tempSelections[method.id] ?? method.trainingModes.first?.id },
+                                        set: { tempSelections[method.id] = $0 }
+                                    )) {
+                                        ForEach(method.trainingModes) { mode in
+                                            Text(mode.name).tag(mode.id as UUID?)
+                                        }
+                                    }
+                                    .pickerStyle(.segmented)
+                                    .accessibilityLabel("\(method.name) 训练模式")
+                                }
+                            }
                         }
                     }
-                    .accessibilityLabel("\(method.name) \(tempSelectedMethods.contains(method.id) ? "已选" : "未选")")
                 }
-                .buttonStyle(.plain)
             }
-            .navigationTitle("选择训练方法（可多选）")
+            .navigationTitle("设置每日训练方法")
             .navigationBarTitleDisplayMode(.inline)
             .toolbar {
                 ToolbarItem(placement: .navigationBarTrailing) {
@@ -438,35 +476,37 @@ struct PlanBuilderView: View {
     }
 
     private func openMethodPicker(for dayId: UUID) {
-        let methods = viewModel.customPlanDraft.dayDrafts.first(where: { $0.id == dayId })?.methodIds ?? []
-        tempSelectedMethods = Set(methods)
+        let selections = viewModel.customPlanDraft.dayDrafts.first(where: { $0.id == dayId })?.methodSelections ?? []
+        // 还原「方法 -> 模式」选择（AC-13.7）
+        tempSelections = Dictionary(uniqueKeysWithValues: selections.map { ($0.methodId, $0.modeId) })
         editingDayId = dayId
         showMethodPicker = true
     }
-
-    private func toggleTempMethod(_ id: UUID) {
-        if tempSelectedMethods.contains(id) {
-            tempSelectedMethods.remove(id)
+    
+    /// 切换某方法的选中（AC-13.7）：选中时默认取其首个专属模式
+    private func toggleTempMethod(_ method: TrainingMethod) {
+        if tempSelections.keys.contains(method.id) {
+            tempSelections.removeValue(forKey: method.id)
         } else {
-            tempSelectedMethods.insert(id)
+            tempSelections[method.id] = method.trainingModes.first?.id
         }
     }
-
+    
     private func commitMethodPicker() {
         guard let dayId = editingDayId else { return }
         var d = viewModel.customPlanDraft
         if let idx = d.dayDrafts.firstIndex(where: { $0.id == dayId }) {
-            d.dayDrafts[idx].methodIds = Array(tempSelectedMethods)
+            d.dayDrafts[idx].methodSelections = tempSelections.map { MethodSelection(methodId: $0.key, modeId: $0.value) }
         }
         viewModel.customPlanDraft = d
     }
-
+    
     private func toggleDay(_ offset: Int) {
         var d = viewModel.customPlanDraft
         if let idx = d.dayDrafts.firstIndex(where: { $0.dayOffset == offset }) {
             d.dayDrafts.remove(at: idx)
         } else {
-            d.dayDrafts.append(DayDraft(dayOffset: offset, methodIds: []))
+            d.dayDrafts.append(DayDraft(dayOffset: offset, methodSelections: []))
             d.dayDrafts.sort { $0.dayOffset < $1.dayOffset }
         }
         viewModel.customPlanDraft = d
@@ -496,7 +536,7 @@ struct PlanBuilderView: View {
             if let idx = reused.firstIndex(where: { $0.dayOffset == off }) {
                 result.append(reused.remove(at: idx))
             } else {
-                result.append(DayDraft(dayOffset: off, methodIds: []))
+                result.append(DayDraft(dayOffset: off, methodSelections: []))
             }
         }
         return result.sorted { $0.dayOffset < $1.dayOffset }
