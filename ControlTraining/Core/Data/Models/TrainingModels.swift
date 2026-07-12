@@ -210,8 +210,8 @@ struct TrainingRecord: Identifiable {
     let selfRating: Int
     let notes: String
     let mode: TrainingMode
-    let modeId: UUID? = nil         // 需求 13 / AC-13.7 / AC-13.9：方法专属模式 id
-    let modeName: String? = nil       // 需求 13：方法专属模式名（聚合键）
+    var modeId: UUID? = nil         // 需求 13 / AC-13.7 / AC-13.9：方法专属模式 id
+    var modeName: String? = nil       // 需求 13：方法专属模式名（聚合键）
     let isPartial: Bool     // AC-2.10: 强制退出生成的部分记录
     
     init(id: UUID = UUID(),
