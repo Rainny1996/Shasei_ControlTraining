@@ -15,6 +15,8 @@ final class TrainingViewModel: ObservableObject {
     private let haptic = HapticManager.shared
     private var config: TrainingConfig
     private var stateCancellable: AnyCancellable?
+    /// 倒计时镜像：转发状态机内部 countdownRemaining，确保视图刷新
+    private var countdownCancellable: AnyCancellable?
 
     init(config: TrainingConfig) {
         self.config = config
@@ -28,6 +30,12 @@ final class TrainingViewModel: ObservableObject {
             .receive(on: RunLoop.main)
             .sink { [weak self] newState in
                 self?.state = newState
+            }
+        // 倒计时变化不会自动冒泡到 vm，需手动触发 objectWillChange 让计算属性刷新
+        countdownCancellable = machine.$countdownRemaining
+            .receive(on: RunLoop.main)
+            .sink { [weak self] _ in
+                self?.objectWillChange.send()
             }
     }
 

@@ -49,8 +49,8 @@ struct TrainingContainerView: View {
         )
         .onChange(of: vm.state) { new in
             if case .stopWaiting = new {
-                // 10秒监控超时弹窗由状态机发送 timeout → squeeze，此处用弹窗打断
-                DispatchQueue.main.asyncAfter(deadline: .now() + 10) {
+                // 倒计时结束（按钮激活）后，再等待 10 秒监控，若用户仍未确认则弹挤捏法提示
+                DispatchQueue.main.asyncAfter(deadline: .now() + Double(max(vm.countdown, 0)) + 10) {
                     if case .stopWaiting = vm.state { vm.showSqueezePromptIfNeeded() }
                 }
             }

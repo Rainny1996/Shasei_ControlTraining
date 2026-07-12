@@ -50,6 +50,8 @@ final class TrainingStateMachine: ObservableObject {
             completeCycle(count: currentCycleOfState)
         case (.stopWaiting, .doubleFingerHold):
             enterSqueeze(count: currentCycleOfState)
+        case (.stopWaiting, .squeezeTriggered):
+            enterSqueeze(count: currentCycleOfState)
         case (.stopWaiting, .continueWaiting):
             continueWaitingExtended(count: currentCycleOfState)
         case (.stopWaiting, .timeout):
