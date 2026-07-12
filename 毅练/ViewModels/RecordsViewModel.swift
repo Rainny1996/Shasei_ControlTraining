@@ -48,8 +48,8 @@ final class RecordsViewModel: ObservableObject {
         // 耐力：总时长与循环数综合，目标 30 分钟 / 5 循环
         let endurance = clamp01(Double(total) / 1800.0) * 60 + clamp01(Double(cycleCount) / 5.0) * 40
         // 稳定性：刹车点越接近 7 越稳定（6.5~7 理想），偏离扣分；提前射精重罚
-        let brakeDeviation = abs(brake - 7.0)
-        let stability = (100 - brakeDeviation * 25) - (premature ? 40 : 0)
+        let brakeDeviation = abs(Double(brake) - 7.0)
+        let stability = (100.0 - brakeDeviation * 25.0) - Double(premature ? 40 : 0)
         // 完成度：完成循环数与目标 5 对比，提前射精视为未完成
         let completion = clamp01(Double(cycleCount) / 5.0) * 100 - (premature ? 30 : 0)
 

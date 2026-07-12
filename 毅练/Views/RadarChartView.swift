@@ -59,7 +59,7 @@ struct RadarChartView: View {
                         let angle = -CGFloat.pi / 2 + angleStep * CGFloat(i)
                         let v = CGFloat(min(max(item.value, 0), maxValue) / maxValue)
                         let p = CGPoint(x: center.x + radius * v * cos(angle), y: center.y + radius * v * sin(angle))
-                        var dot = Path(ellipseIn: CGRect(x: p.x - 3, y: p.y - 3, width: 6, height: 6))
+                        let dot = Path(ellipseIn: CGRect(x: p.x - 3, y: p.y - 3, width: 6, height: 6))
                         context.fill(dot, with: .color(Color.ylGreen))
                     }
                 }
