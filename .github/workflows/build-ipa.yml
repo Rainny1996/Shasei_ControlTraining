@@ -35,10 +35,23 @@ jobs:
           xcodebuild -version
           echo "DEVELOPER_DIR=$DEVELOPER_DIR"
 
+      - name: Locate project
+        id: locate
+        run: |
+          # 在仓库根查找 .xcodeproj，兼容本地嵌套目录与仓库根直接包含两种情况
+          PROJECT_FILE=$(find . -name "毅练.xcodeproj" -maxdepth 3 | head -1)
+          if [ -z "$PROJECT_FILE" ]; then
+            echo "::error::Could not locate 毅练.xcodeproj"
+            find . -name "*.xcodeproj" | head -20
+            exit 1
+          fi
+          echo "PROJECT_FILE=$PROJECT_FILE" >> "$GITHUB_OUTPUT"
+          echo "Found project at: $PROJECT_FILE"
+
       - name: Diagnostics - xcodebuild list
         run: |
           echo "=== xcodebuild -list ==="
-          xcodebuild -list -project "毅练/毅练.xcodeproj" || echo "LIST FAILED with code $?"
+          xcodebuild -list -project "${{ steps.locate.outputs.PROJECT_FILE }}" || echo "LIST FAILED with code $?"
 
       - name: Clean Build
         run: |
@@ -49,7 +62,7 @@ jobs:
         run: |
           set -o pipefail
           xcodebuild build \
-            -project "毅练/毅练.xcodeproj" \
+            -project "${{ steps.locate.outputs.PROJECT_FILE }}" \
             -target "毅练" \
             -configuration Release \
             -sdk iphoneos \
