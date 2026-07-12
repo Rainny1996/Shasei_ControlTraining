@@ -1,8 +1,8 @@
 # 设计文档（v2.0 正式版）
 
-> **文档状态**：v2.0（对齐需求文档 v2.0，全量 AC 覆盖）
-> **最后更新**：2026-07-11
-> **说明**：第二轮重写的设计基线——①落地需求 3/6 的算法规格（消除黑盒）；②更正安全设计与代码真实缺陷（BUG-CT-01/03/04/06）的一致性；③补充需求 8/9、合规、无障碍、iCloud 排除的设计；④数据模型补强校验与状态字段；⑤建立 AC 追溯映射实现"需求→设计→缺陷"闭环。
+> **文档状态**：v2.0（对齐需求文档 v2.0，全量 AC 覆盖）＋ v2.1 训练计划增强设计（需求 10/11/12，决策已冻结）
+> **最后更新**：2026-07-12
+> **说明**：第二轮重写的设计基线——①落地需求 3/6 的算法规格（消除黑盒）；②更正安全设计与代码真实缺陷（BUG-CT-01/03/04/06）的一致性；③补充需求 8/9、合规、无障碍、iCloud 排除的设计；④数据模型补强校验与状态字段；⑤建立 AC 追溯映射实现"需求→设计→缺陷"闭环；⑥v2.1 新增 §5 训练计划增强设计（需求 10/11/12），沉淀三种计划相关需求的完整交互流/数据契约/服务与视图模型契约，并固化 Q1–Q6 决策记录（原 `design-需求10/11/12` 已归档至 `docs/archive/plan-v2.1/`）。
 
 ### 修订历史
 
@@ -10,6 +10,8 @@
 |------|------|----------|
 | v1.0 | 2026-07（第一轮） | 初始设计，覆盖需求 1–7，存在算法黑盒、安全描述与实际代码矛盾、需求 8/9/合规/无障碍缺失 |
 | v2.0 | 2026-07-11 | **本轮重写**：①新增 §2.6 算法规格（映射表+加权模型）；②更正 §2.4 安全设计（单一加密入口、单一后台锁注册、后台模糊而非截屏模糊、NSFileProtectionComplete 正确写法）；③新增 §2.1.4 数据管理页、§2.1.5 合规页、§2.7 无障碍设计；④数据模型补 selfRating 校验、CheckInStatus 枚举、AnalysisConfig、部分记录分支；⑤补充 iCloud 排除；⑥复盘提升为独立 Tab；⑦建立 §4 AC 追溯映射表 |
+| v2.1 | 2026-07-12 | **训练计划增强设计（需求 10/11/12，决策已冻结）**：①数据层——`PlanModels.swift` 新增 `UserPlanTemplate`（`days:[UserPlanTemplateDay]`，Q3 支持一日多方法；保留 `methodIds`/`trainingDayOffsets` 计算属性 + `description`）+ `PlanDraft`（按日 `dayDrafts`）；`*.xcdatamodeld` 新增 `CDUserPlanTemplate`（`daysData` Binary JSON，整库排除 iCloud）；`CDUserPlanTemplate+CoreDataClass.swift`；`PlanRepository` 仅新增 `saveUserTemplate`/`fetchUserTemplates`/`deleteUserTemplate`（Q6：不新增单条增删改）；`PlanService` 新增 `buildCustomPlan(dayDrafts:baseTemplate:goal:)`/`draftFromTemplate`/`draftFromUserTemplate`/`allTemplatesForSelection`/`saveUserTemplate`/`loadUserTemplates`。②**完整设计沉淀于 §5**（交互流/数据契约/服务与视图模型契约 + Q1–Q6 决策记录），原 `design-需求10/11/12` 已归档至 `docs/archive/plan-v2.1/` |
+| v2.1.1 | 2026-07-12 | 文档整理：将 `docs/ai-workflow/plan-v2.1/` 下的 v2.1 设计草案（需求 10/11/12 设计规格 + 01~04 分工 Prompt）核心合并进本文件 §5，原文件归档至 `docs/archive/plan-v2.1/`（含 MANIFEST）；`open-questions.md`/`BUG-TASK-ASSIGNMENT.md` 保留原位并标注已完成 |
 
 ---
 
@@ -363,4 +365,72 @@ S = Σ(w_i × D_i)，Σw_i = 1
 
 ---
 
-*本设计文档为 v2.0 正式版，覆盖全部 9 项需求 + §6 合规要求，可作为第二轮开发与代码审查的设计基线。*
+---
+
+## 5. v2.1 训练计划增强设计（需求 10 / 11 / 12）
+
+> 迭代：v2.1 ｜ 关联 AC：AC-10.1~10.7、AC-11.1~11.7、AC-12.1~12.6
+> 设计冻结依据：`docs/ai-workflow/plan-v2.1/open-questions.md`（Q1–Q6 已全部确认，设计冻结）
+> 本节为核心设计沉淀，源自 `design-需求10-自定义计划.md` / `design-需求11-逐条编辑.md` / `design-需求12-直达陪练.md`（已归档至 `docs/archive/plan-v2.1/`，如需逐字段/逐方法签名细节请查阅归档原文）。
+
+### 5.1 需求 10 — 自定义训练计划（AC-10.1~10.7）
+
+**交互流**：计划页 Menu「自定义计划」→ 选择起点（选模板再改 / 空白自建）→ `PlanBuilderView`（共用编辑器，内存草稿 `PlanDraft`）→ 保存为「我的模板」(`UserPlanTemplate`) 或「生成计划」(写入活跃计划，覆盖前二次确认，AC-10.6)。两种起点后续编辑逻辑完全一致。**仅暴露三类控件**：方法（按日多选 sheet）、每周训练天数（Stepper）、具体训练日期（星期多选）；**不出现时长/强度/周期入口**（AC-10.4）。
+
+**草稿与数据模型**：
+- `DayDraft`：`dayOffset: Int`(0…6, 相对 plan.startDate) + `methodIds: [UUID]`（≥1，支持一日多方法，Q3）。
+- `PlanDraft`：`sourceTemplateId?` / `name` / `goal: TrainingGoal` / `difficulty` / `dayDrafts: [DayDraft]`；计算属性 `allMethodIds`（去重保序）、`trainingDayOffsets`。
+- `UserPlanTemplate`（「我的模板」，可持久化）：`days: [UserPlanTemplateDay]`，每 `UserPlanTemplateDay = (dayOffset, methodIds)`；保留 `frequency` / `methodIds` / `trainingDayOffsets` 为计算属性（物理存储为 `days`）；含可选 `description: String?`（Q5）；`icon` 默认 `"star.fill"`。仍满足需求 10 字段命名（`name/difficulty/frequency/goal/icon/methodIds/trainingDayOffsets`）。
+- Core Data 实体 `CDUserPlanTemplate`：`id`/`name`/`difficulty`(raw)/`frequency`(Int16)/`goal`(raw)/`icon`/`daysData`(Binary，JSON 编码 `[UserPlanTemplateDay]`)/`desc?`/`createdAt`/`updatedAt`；存储文件已在 `DataController` 排除 iCloud 备份（AC-7.5/AC-NF.7）；`CDUserPlanTemplate+CoreDataClass.swift` 负责 `daysData` ↔ `[UserPlanTemplateDay]` 的 JSON 编解码。
+
+**服务契约**（`PlanService`，扩展点）：
+- `draftFromTemplate(_:) -> PlanDraft` / `draftFromUserTemplate(_:) -> PlanDraft`：将生成的 `TrainingPlan` 按 `date` 相对 `startDate` 的 dayOffset 分组各 `item.methodId`，保留「一日多方法」。
+- `buildCustomPlan(dayDrafts: [DayDraft], baseTemplate: PlanTemplate? = nil, goal: TrainingGoal? = nil) -> TrainingPlan`：固定 `periodDays = 7`（`startDate` 今日起）；对每个 `day ∈ dayDrafts` 的 `day.methodIds` 中每个方法生成一条 `PlanItem(date: methodId: methodName: duration: method.defaultDuration)`；`updateProgress()`。不改变既有 `PlanItem` 字段；不修改 `generatePlan`/`generatePlanFromTemplate`/`adjustPlan` 逻辑（AC-10.6 兼容）。
+
+**视图模型契约**（`PlanViewModel`）：`openCustomPlan(from: PlanTemplate? = nil)` / `loadUserTemplates()` / `saveCurrentDraftAsTemplate(name:)` / `deleteUserTemplate(_:)` / `generatePlanFromDraft()`（内部 `commitCustomPlan` → `buildCustomPlan` → `deletePlan` 旧活跃计划 → `saveTrainingPlan` → `loadPlan`；校验 dayDrafts 非空且至少一天有方法）。
+
+**范围边界**：Q4 确认 v2.1 不做模板就地编辑（编辑 = 选模板再改后另存为新模板）；不引入新三方库/架构，沿用 MVVM + Repository + Core Data。
+
+### 5.2 需求 11 — 当前计划逐条编辑（AC-11.1~11.7）
+
+**编辑草稿状态机**：计划页 Menu「编辑计划」→ 编辑模式（深拷贝 `currentPlan` 为内存草稿 `PlanEditDraft(planId, startDate, endDate, items: [PlanItem])`）；增/删/改（替换方法 / 改时长 / 改日期 / 增项 / 删项）仅作用于内存 `items`；「取消」丢弃副本不落库（AC-11.5）；「保存」整体落库并刷新。保留「智能调整」入口，不改动 `adjustPlanIfNeeded`（AC-11.6）。
+
+**数据模型**：复用 `PlanItem`（`id/date/methodId/methodName/duration/isCompleted/completedAt`），编辑仅改 `methodId/methodName/duration/date` 四个可变维度，`isCompleted/completedAt` 保留；方法来源 `TrainingContentData.allTrainingMethods()`。
+
+**仓库契约**：**Q6 确认仅全量保存** —— 复用既有 `updatePlanItems(planId:items:)`（后台上下文 + 主上下文合并 + `updateProgress()`）；**不新增** `addPlanItem`/`updatePlanItem`/`removePlanItem` 单条方法。写操作沿用 `performBackgroundTask` + 主上下文合并（AC-NF.8）。
+
+**视图模型契约**（`PlanViewModel`）：`@Published showPlanEditor` / `editingDraft?`；`beginPlanEditing()` / `editItemMethod(_:method:)` / `editItemDuration(_:duration:)` / `editItemDate(_:date:)` / `addItem(method:date:)`（duration 取方法 defaultDuration）/ `removeItem(_:)` / `savePlanEdits() -> [PlanEditValidationError]` / `cancelPlanEdits()`。
+
+**保存校验规则（AC-11.5，须全部通过才落库）**：①每项 `duration > 0`；②每项 `date ∈ [startDate, endDate]`；③编辑后 `items` 非空。失败：`savePlanEdits()` 返回非空集合、`showPlanEditor` 保持、UI 高亮错误项；通过：`planRepository.updatePlanItems` → `loadPlan()` 刷新今日/本周/进度。
+
+### 5.3 需求 12 — 今日训练动作直达陪练（AC-12.1~12.6）
+
+**数据流**：今日训练卡片 →（点动作行主体非完成按钮，AC-12.1）`PlanItemDetailView`（复用 `TrainingDetailView` 方法说明以满足 AC-C.2/AC-C.5，叠加计划项日期/时长信息条 `PlanItemInfoBar`）→ 底部「开始陪练」（AC-12.2）→ `CoachView(initialMethod:planItemId:onPlanItemComplete:)`（复用既有陪练，AC-12.3）。
+**完成判定（AC-12.4，呼应 Q1）**：仅当 `CoachViewModel` 保存**非 partial** 训练记录（`tickTraining()` 自然计时结束分支 → `completeTraining()`）才触发 `PlanViewModel.markItemCompleted(planItemId)`；中途「结束」/返回保存 **partial** 记录（`savePartialRecordOnBackground()`），**不**触发勾选。已完成项（`item.isCompleted`）点击仅查看，开始按钮禁用、不重复触发（AC-12.5）。
+
+**入口改造**：`TodayPlanItemRow` 新增 `onTapItem: (() -> Void)?`，整行训练信息 + chevron 作为可点区域（≥44pt，完成按钮独立）；`PlanView.todayTrainingCard` 传入 `onTapItem: { viewModel.openPlanItemDetail(item) }`。
+
+**`CoachView` 契约扩展**：`initialMethod: TrainingMethod?` / `planItemId: UUID?` / `onPlanItemComplete: (() -> Void)?`；`CoachViewModel` 新增 `onTrainingCompleted?`（仅非 partial 完成触发）；以 `.fullScreenCover` 呈现（与既有入口一致）。
+
+**`PlanItemDetailView`**：组合 `TrainingDetailView(method:viewModel:onStartCoach:)`（`onStartCoach` 改写启动行为，非空时替换内部 `showStartTraining`，`nil` 时向后兼容）+ `PlanItemInfoBar` + 底部「开始陪练」（已完成项禁用）；`fullScreenCover` 呈现 `CoachView`。
+
+**`PlanViewModel` 契约**：`@Published showPlanItemDetail` / `selectedPlanItem?`；`openPlanItemDetail(_:)`（由 `item.methodId` 经 `TrainingContentData.method(id:)` 解析 method）；复用幂等 `markItemCompleted(_:)`（repository 直接置 `isCompleted=true`，重复调用安全）。
+
+**范围边界**：不改写陪练计时/语音/阶段逻辑（仅新增 `planItemId` 透传与完成回调）；不新增 `PlanItem` 字段（详情信息来自既有 `date/duration/methodId`）；不改 `markPlanItemCompleted` 实现。
+
+### 5.4 v2.1 决策记录（open-questions Q1–Q6，已冻结）
+
+| 决策 | 结论 |
+|------|------|
+| Q1（需求12「结束」语义） | 中途「结束」= 保存 **partial** 记录且不触发 `onPlanItemComplete`；仅 `tickTraining()` 自然计时结束（非 partial）触发 `markPlanItemCompleted(planItemId)` |
+| Q2（需求10 周期长度） | 固定 **7 天**周计划，`trainingDayOffsets` 仅在该周内挑星期；更长周期留待后续迭代 |
+| Q3（需求10 每日方法数） | 否决「每日 1 方法」→ 支持**同一天多方法**；数据模型改为按日分组 `PlanDraft.dayDrafts` / `UserPlanTemplate.days`；`buildCustomPlan` 对每个 `(日,方法)` 生成一条 `PlanItem` |
+| Q4（需求10 模板就地编辑） | v2.1 **不做**；「编辑模板」=「选我的模板再改」后另存为新模板（旧可删） |
+| Q5（需求10 模板描述） | `UserPlanTemplate` 含可选 `description: String?` |
+| Q6（需求11 单条粒度方法） | 仅全量保存 `updatePlanItems(planId:items:)`；**不提供** `upsertPlanItem`/`addPlanItem`/`removePlanItem` 单条方法 |
+
+> 后续代码改动以 `open-questions.md` 结论及本 §5 为准；原计划草案已归档至 `docs/archive/plan-v2.1/`。
+
+---
+
+*本设计文档为 v2.0 正式版＋v2.1 训练计划增强设计（需求 10/11/12），覆盖全部 9 项需求 + §6 合规要求 + v2.1 计划相关三项需求，可作为第二轮开发与代码审查的设计基线。*

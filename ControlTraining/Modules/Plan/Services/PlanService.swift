@@ -5,7 +5,12 @@ class PlanService {
     
     static let shared = PlanService()
     
-    private init() {}
+    private let dataController: DataController
+
+    /// 可注入初始化（需求 10 / AC-10.5 测试可注入内存库）；shared 仍默认生产库，行为不变。
+    init(dataController: DataController = .shared) {
+        self.dataController = dataController
+    }
     
     // MARK: - 计划生成算法
     
@@ -415,6 +420,119 @@ class PlanService {
             trainingGoal: template.goal
         )
         return generatePlan(from: assessment)
+    }
+
+    // MARK: - 自定义计划（需求 10 / 需求 11）
+
+    /// 由预设计划模板生成编辑器草稿（选模板再改）
+    /// 按训练日分组保留「每日方法」，支持 Q3 一日多方法（AC-10.2）
+    func draftFromTemplate(_ template: PlanTemplate) -> PlanDraft {
+        let plan = generatePlanFromTemplate(template)
+        let calendar = Calendar.current
+        var byDay: [Int: [UUID]] = [:]
+        for item in plan.items {
+            let off = calendar.dateComponents([.day], from: plan.startDate, to: item.date).day ?? 0
+            byDay[off, default: []].append(item.methodId)
+        }
+        let dayDrafts = byDay.sorted(by: { $0.key < $1.key })
+            .map { DayDraft(dayOffset: $0.key, methodIds: $0.value) }
+        return PlanDraft(
+            sourceTemplateId: template.id,
+            goal: template.goal,
+            difficulty: template.difficulty,
+            dayDrafts: dayDrafts
+        )
+    }
+
+    /// 由「我的模板」还原编辑器草稿（需求 10 / AC-10.5 复用）
+    /// 直接恢复保存时的每日方法分配，而非重新生成，保证「复用」一致（Q3 兼容）
+    func draftFromUserTemplate(_ ut: UserPlanTemplate) -> PlanDraft {
+        let dayDrafts = ut.days.map { DayDraft(dayOffset: $0.dayOffset, methodIds: $0.methodIds) }
+        return PlanDraft(
+            sourceTemplateId: ut.id,
+            name: ut.name,
+            goal: ut.goal,
+            difficulty: ut.difficulty,
+            dayDrafts: dayDrafts
+        )
+    }
+
+    /// 由用户草稿（每日可含多方法，Q3）生成自定义训练计划（需求 10 / AC-10.2/10.3/10.6）
+    /// - Parameters:
+    ///   - dayDrafts: 各训练日及其方法（dayOffset 0...6，methodIds 可含多项，满足 Q3「一日多方法」）
+    ///   - baseTemplate: 选模板再改时传入预设模板（仅用于目标描述）
+    ///   - goal: 空白自建时的训练目标，用于计划描述
+    /// - Returns: 合法 TrainingPlan（训练日均落在 [startDate, endDate] 周期内）
+    func buildCustomPlan(dayDrafts: [DayDraft],
+                         baseTemplate: PlanTemplate? = nil,
+                         goal: TrainingGoal? = nil) -> TrainingPlan {
+        let calendar = Calendar.current
+        let startDate = calendar.startOfDay(for: Date())
+        let endDate = calendar.date(byAdding: .day, value: 7, to: startDate)!
+
+        let allMethods = TrainingContentData.allTrainingMethods()
+
+        var items: [PlanItem] = []
+        for day in dayDrafts where (0...6).contains(day.dayOffset) {
+            let date = calendar.date(byAdding: .day, value: day.dayOffset, to: startDate)!
+            // Q3：同一天可分配多个方法，每个 (日, 方法) 生成一条 PlanItem
+            for methodId in day.methodIds {
+                guard let method = allMethods.first(where: { $0.id == methodId }) else { continue }
+                let item = PlanItem(
+                    date: date,
+                    methodId: method.id,
+                    methodName: method.name,
+                    duration: method.defaultDuration   // AC-10.4 不暴露强度/时长，固定 defaultDuration
+                )
+                items.append(item)
+            }
+        }
+
+        let goalDescription: String
+        if let base = baseTemplate {
+            goalDescription = base.goal.description
+        } else if let g = goal {
+            goalDescription = g.description
+        } else {
+            goalDescription = "自定义训练计划"
+        }
+
+        var plan = TrainingPlan(
+            startDate: startDate,
+            endDate: endDate,
+            items: items,
+            goal: goalDescription
+        )
+        plan.updateProgress()
+        return plan
+    }
+
+    /// 合并预设模板与「我的模板」供选择器展示（需求 10 / AC-10.5）
+    func allTemplatesForSelection() -> [PlanTemplate] {
+        var list = PlanService.planTemplates()
+        for ut in loadUserTemplates() {
+            list.append(PlanTemplate(
+                name: ut.name,
+                description: ut.description ?? "我的自定义模板",
+                difficulty: ut.difficulty,
+                frequency: ut.frequency,
+                goal: ut.goal,
+                icon: ut.icon
+            ))
+        }
+        return list
+    }
+
+    // MARK: - 「我的模板」持久化（需求 10 / AC-10.5）
+
+    /// 保存「我的模板」（封装 Repository，走注入的 dataController）
+    func saveUserTemplate(_ template: UserPlanTemplate) {
+        PlanRepository(dataController: dataController).saveUserTemplate(template)
+    }
+
+    /// 读取「我的模板」（封装 Repository，走注入的 dataController）
+    func loadUserTemplates() -> [UserPlanTemplate] {
+        return PlanRepository(dataController: dataController).fetchUserTemplates()
     }
 }
 

@@ -6,6 +6,12 @@ struct CoachView: View {
     /// 传入的训练方法（可选，从训练详情页进入时提供）
     var initialMethod: TrainingMethod?
     
+    /// 关联的计划项 id（需求 12：从今日动作直达陪练时传入）
+    var planItemId: UUID? = nil
+    
+    /// 自然完成（生成非 partial 记录）后的回调（需求 12 / AC-12.4）
+    var onPlanItemComplete: (() -> Void)? = nil
+    
     @State private var selectedMode: TrainingMode = .basic
     @State private var selectedMethod: TrainingMethod?
     @State private var isTraining = false
@@ -13,6 +19,7 @@ struct CoachView: View {
     @State private var showReviewQuestionnaire = false
     
     @StateObject private var trainingViewModel = TrainingViewModel()
+    @Environment(\.dismiss) private var dismiss
     
     var body: some View {
         NavigationStack {
@@ -25,6 +32,14 @@ struct CoachView: View {
             }
             .navigationTitle("陪练")
             .navigationBarTitleDisplayMode(.inline)
+            .toolbar {
+                ToolbarItem(placement: .navigationBarTrailing) {
+                    Button(action: { dismiss() }) {
+                        Image(systemName: "xmark.circle.fill")
+                    }
+                    .accessibilityLabel("关闭陪练")
+                }
+            }
         }
         .onAppear {
             if let method = initialMethod {
@@ -509,7 +524,7 @@ struct CoachView: View {
                     }
                     
                     // 返回训练详情
-                    Button(action: cancelTraining) {
+                    Button(action: { dismiss() }) {
                         Text("返回训练列表")
                             .font(.subheadline)
                             .foregroundColor(.secondary)
@@ -582,6 +597,7 @@ struct CoachView: View {
         
         // 创建ViewModel
         let viewModel = CoachViewModel(method: method, mode: selectedMode)
+        viewModel.onTrainingCompleted = onPlanItemComplete
         coachViewModel = viewModel
         isTraining = true
         

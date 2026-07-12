@@ -86,4 +86,16 @@
         <attribute name="notes" optional="YES" attributeType="String"/>
         <relationship name="trainingRecord" optional="YES" maxCount="1" deletionRule="Nullify" destinationEntity="CDTrainingRecord" inverseName="reviewNotes" inverseEntity="CDTrainingRecord"/>
     </entity>
+    <entity name="CDUserPlanTemplate" representedClassName="CDUserPlanTemplate" syncable="YES" codeGenerationType="category">
+        <attribute name="id" attributeType="UUID" usesScalarValueType="NO"/>
+        <attribute name="name" attributeType="String"/>
+        <attribute name="difficulty" attributeType="String"/>
+        <attribute name="frequency" attributeType="Integer 16" defaultValueString="0" usesScalarValueType="YES"/>
+        <attribute name="goal" attributeType="String"/>
+        <attribute name="icon" attributeType="String"/>
+        <attribute name="daysData" optional="YES" attributeType="Binary" allowsExternalBinaryDataStorage="YES"/>
+        <attribute name="desc" optional="YES" attributeType="String"/>
+        <attribute name="createdAt" attributeType="Date" usesScalarValueType="NO"/>
+        <attribute name="updatedAt" attributeType="Date" usesScalarValueType="NO"/>
+    </entity>
 </model>

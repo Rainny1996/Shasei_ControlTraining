@@ -23,6 +23,14 @@ struct PlanView: View {
                         Button(action: { viewModel.showTemplateSelection = true }) {
                             Label("选择模板", systemImage: "doc.text")
                         }
+                        Button(action: { viewModel.openCustomPlan() }) {
+                            Label("自定义计划", systemImage: "slider.horizontal.3")
+                        }
+                        if viewModel.hasActivePlan {
+                            Button(action: { viewModel.beginPlanEditing() }) {
+                                Label("编辑计划", systemImage: "pencil")
+                            }
+                        }
                         Button(action: { viewModel.regeneratePlan() }) {
                             Label("重新生成", systemImage: "arrow.clockwise")
                         }
@@ -43,6 +51,20 @@ struct PlanView: View {
             }
             .sheet(isPresented: $viewModel.showTemplateSelection) {
                 TemplateSelectionView(viewModel: viewModel)
+            }
+            .sheet(isPresented: $viewModel.showPlanItemDetail) {
+                if let item = viewModel.selectedPlanItem,
+                   let method = TrainingContentData.allTrainingMethods().first(where: { $0.id == item.methodId }) {
+                    PlanItemDetailView(item: item, method: method, planViewModel: viewModel)
+                }
+            }
+            .sheet(isPresented: $viewModel.showCustomPlanBuilder) {
+                PlanBuilderView(viewModel: viewModel)
+            }
+            .sheet(isPresented: $viewModel.showPlanEditor) {
+                if viewModel.editingDraft != nil {
+                    PlanEditView(viewModel: viewModel)
+                }
             }
             .onAppear {
                 viewModel.loadPlan()
@@ -91,6 +113,20 @@ struct PlanView: View {
                     HStack {
                         Image(systemName: "doc.text")
                         Text("选择计划模板")
+                            .font(.headline)
+                    }
+                    .frame(maxWidth: .infinity)
+                    .padding(.vertical, 14)
+                    .background(Color.accentColor.opacity(0.1))
+                    .foregroundColor(.accentColor)
+                    .cornerRadius(12)
+                }
+                
+                // 自定义计划按钮（AC-10.1）
+                Button(action: { viewModel.openCustomPlan() }) {
+                    HStack {
+                        Image(systemName: "slider.horizontal.3")
+                        Text("自定义计划")
                             .font(.headline)
                     }
                     .frame(maxWidth: .infinity)
@@ -225,8 +261,10 @@ struct PlanView: View {
             } else {
                 // 今日训练项列表
                 ForEach(viewModel.todayItems) { item in
-                    TodayPlanItemRow(item: item) {
+                    TodayPlanItemRow(item: item, onComplete: {
                         viewModel.markItemCompleted(item.id)
+                    }) {
+                        viewModel.openPlanItemDetail(item)
                     }
                 }
             }
@@ -449,10 +487,11 @@ struct PlanView: View {
 struct TodayPlanItemRow: View {
     let item: PlanItem
     let onComplete: () -> Void
+    var onTapItem: (() -> Void)? = nil   // 新增：点击行主体进入详情（AC-12.1）
     
     var body: some View {
         HStack(spacing: 12) {
-            // 完成按钮
+            // 完成按钮（独立区域，点击不触发导航）
             Button(action: {
                 if !item.isCompleted {
                     onComplete()
@@ -463,31 +502,39 @@ struct TodayPlanItemRow: View {
                     .foregroundColor(item.isCompleted ? .green : .gray.opacity(0.4))
             }
             .disabled(item.isCompleted)
+            .accessibilityLabel(item.isCompleted ? "已完成" : "标记完成")
             
-            // 训练信息
-            VStack(alignment: .leading, spacing: 4) {
-                Text(item.methodName)
-                    .font(.subheadline.bold())
-                    .foregroundColor(item.isCompleted ? .secondary : .primary)
-                    .strikethrough(item.isCompleted)
-                
-                Text(formatDuration(item.duration))
-                    .font(.caption)
-                    .foregroundColor(.secondary)
+            // 训练信息 + chevron 整体作为可点区域（≥44pt，AC-12.6）
+            Button(action: { onTapItem?() }) {
+                HStack(spacing: 12) {
+                    VStack(alignment: .leading, spacing: 4) {
+                        Text(item.methodName)
+                            .font(.subheadline.bold())
+                            .foregroundColor(item.isCompleted ? .secondary : .primary)
+                            .strikethrough(item.isCompleted)
+                        
+                        Text(formatDuration(item.duration))
+                            .font(.caption)
+                            .foregroundColor(.secondary)
+                    }
+                    
+                    Spacer()
+                    
+                    // 状态
+                    if item.isCompleted {
+                        Text("已完成")
+                            .font(.caption)
+                            .foregroundColor(.green)
+                    } else {
+                        Image(systemName: "chevron.right")
+                            .font(.caption)
+                            .foregroundColor(.secondary)
+                    }
+                }
             }
-            
-            Spacer()
-            
-            // 状态
-            if item.isCompleted {
-                Text("已完成")
-                    .font(.caption)
-                    .foregroundColor(.green)
-            } else {
-                Image(systemName: "chevron.right")
-                    .font(.caption)
-                    .foregroundColor(.secondary)
-            }
+            .buttonStyle(.plain)
+            .accessibilityLabel("查看 \(item.methodName) 详情并开始陪练")
+            .accessibilityHint("进入动作详情页")
         }
         .padding(.vertical, 8)
         .padding(.horizontal, 12)

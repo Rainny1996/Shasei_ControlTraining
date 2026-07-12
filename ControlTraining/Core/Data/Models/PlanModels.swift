@@ -80,6 +80,111 @@ struct PlanItem: Identifiable, Equatable {
     }
 }
 
+// MARK: - 自定义计划草稿（不落库，仅编辑器内存态）
+
+/// 单日草稿：某个训练日及其方法（需求 10 / Q3 支持一日多方法）
+struct DayDraft: Identifiable, Hashable {
+    let id: UUID
+    var dayOffset: Int        // 0...6，相对 plan.startDate 的星期偏移
+    var methodIds: [UUID]      // 该日选择的训练方法（≥1，支持多方法）
+}
+
+/// 自定义计划编辑器内存草稿（需求 10 / AC-10.2/10.3/10.4，Q3 支持一日多方法）
+/// - 由模板初始化：前端先调 `PlanService.draftFromTemplate(_:)` 得到预填草稿（按日分组）
+/// - 由空白初始化：`dayDrafts=[]`，`goal/difficulty` 由用户选择
+struct PlanDraft {
+    var sourceTemplateId: UUID? = nil   // 选模板再改时记录来源；空白为 nil
+    var name: String = ""             // 仅用于「保存为我的模板」时命名
+    var goal: TrainingGoal = .endurance
+    var difficulty: DifficultyLevel = .beginner
+    var dayDrafts: [DayDraft] = []      // 各训练日及其方法（取代原 selectedMethodIds + trainingDayOffsets）
+
+    /// 全部已选方法（去重、保序），供「我的模板」/展示使用
+    var allMethodIds: [UUID] {
+        var seen: [UUID] = []
+        for d in dayDrafts where !d.methodIds.isEmpty {
+            for m in d.methodIds where !seen.contains(m) { seen.append(m) }
+        }
+        return seen
+    }
+    /// 全部训练日偏移（排序）
+    var trainingDayOffsets: [Int] {
+        dayDrafts.map { $0.dayOffset }.sorted()
+    }
+}
+
+// MARK: - 计划编辑草稿（需求 11 / AC-11.5）
+
+/// 计划编辑态内存草稿（需求 11 / AC-11.1~11.5）
+/// 进入编辑即深拷贝当前 `TrainingPlan`，全程不写库；取消直接丢弃（AC-11.5）。
+struct PlanEditDraft {
+    let planId: UUID
+    let startDate: Date
+    let endDate: Date
+    var items: [PlanItem]                 // 可变副本，编辑仅改 methodId/methodName/duration/date
+}
+
+// MARK: - 我的模板（用户数据，持久化）
+
+/// 模板中的单日定义（需求 10 / Q3 支持一日多方法）
+struct UserPlanTemplateDay: Codable, Identifiable, Hashable {
+    let id: UUID
+    var dayOffset: Int        // 0...6
+    var methodIds: [UUID]      // 该日方法（≥1）
+}
+
+/// 「我的模板」领域模型（需求 10 / AC-10.5）
+/// 属用户数据，由 Core Data 持久化并排除 iCloud 备份（呼应 AC-7.5/AC-NF.7）
+/// - Q3：以 `days` 记录每日方法，支持同一天多种方法；`methodIds`/`trainingDayOffsets` 为便捷计算属性，
+///   仍满足需求 10「字段至少含 methodIds / trainingDayOffsets」的要求。
+struct UserPlanTemplate: Identifiable, Codable {
+    let id: UUID
+    var name: String
+    let difficulty: DifficultyLevel
+    let frequency: Int              // 每周训练天数（= days.count，冗余保存便于展示/检索）
+    let goal: TrainingGoal
+    let icon: String
+    let days: [UserPlanTemplateDay]  // 每日方法（支持 Q3 一日多方法）
+    var description: String?        // 可选，提升模板库可读性（Q5）
+    let createdAt: Date
+    var updatedAt: Date
+
+    /// 全部方法 id（去重），兼容既有字段命名
+    var methodIds: [UUID] {
+        var seen: [UUID] = []
+        for d in days where !d.methodIds.isEmpty {
+            for m in d.methodIds where !seen.contains(m) { seen.append(m) }
+        }
+        return seen
+    }
+    /// 全部训练日偏移（排序），兼容既有字段命名
+    var trainingDayOffsets: [Int] {
+        days.map { $0.dayOffset }.sorted()
+    }
+
+    init(id: UUID = UUID(),
+         name: String,
+         difficulty: DifficultyLevel,
+         frequency: Int,
+         goal: TrainingGoal,
+         icon: String,
+         days: [UserPlanTemplateDay],
+         description: String? = nil,
+         createdAt: Date = Date(),
+         updatedAt: Date = Date()) {
+        self.id = id
+        self.name = name
+        self.difficulty = difficulty
+        self.frequency = frequency
+        self.goal = goal
+        self.icon = icon
+        self.days = days
+        self.description = description
+        self.createdAt = createdAt
+        self.updatedAt = updatedAt
+    }
+}
+
 // MARK: - Assessment Model
 
 /// 初始评估问卷数据模型

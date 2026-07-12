@@ -10,12 +10,20 @@
 ```
 docs/
 ├── README.md              ← 你在这里
-├── BUG-TASK-ASSIGNMENT.md    — Bug 修复任务分配与状态（v0.0.2 已修复）
+├── BUG-TASK-ASSIGNMENT.md    — 【✅ 已完结】Bug 修复任务分配（v0.0.2 · 4/4 已修复，详见 v5.9 复查报告）
 │
 ├── specs/                 ← 📋 项目核心规格文档
 │   ├── requirements.md    — 需求文档（v2.0，含验收标准编号 AC-x.y）
-│   ├── design.md          — 架构设计文档（v2.0，匹配需求）
+│   ├── design.md          — 架构设计文档（v2.0 + v2.1 训练计划增强设计 §5，匹配需求）
 │   └── tasks.md           — 实现任务拆分（v2.0，绑定 AC 编号）
+│
+├── ai-workflow/           ← 🔧 AI 协作工作流（活跃草案）
+│   └── plan-v2.1/
+│       └── open-questions.md   — 【✅ 已完结·设计冻结】需求 10/11/12 决策记录（Q1–Q6 已确认）
+│                                （其余 design-需求10/11/12 + 01~04 分工 Prompt 已归档 → docs/archive/plan-v2.1/）
+│
+├── archive/               ← 📦 历史里程碑归档（含 MANIFEST）
+│   └── plan-v2.1/         — v2.1 训练计划增强设计草案归档（含 MANIFEST.md，核心已并入 specs/design.md §5）
 │
 └── reviews/               ← 🔍 代码审查报告
     ├── v5.9-BUG修复复查报告.md    — 【最新】用户反馈 4 项 Bug 修复源码复查：✅ 4/4 通过（#1 评估跳转 / #2 智能调整 / #3 挤压图标 / #4 密码·FaceID 冷启动），含编译验证
@@ -55,7 +63,7 @@ docs/
 | 文档 | 版本 | 状态 |
 |------|------|------|
 | requirements.md | v2.0 | 当前活跃 |
-| design.md | v2.0 | 对齐需求 v2.0 |
+| design.md | v2.0 + v2.1 | v2.0 对齐需求；v2.1 训练计划增强设计（需求 10/11/12）已沉淀 §5，原草案归档至 docs/archive/plan-v2.1/ |
 | tasks.md | v2.0 | 对齐需求 v2.0 |
 | 审查报告 | v5.9 | ✅ 4/4 用户反馈 Bug 修复通过（含编译验证），详见 v5.9-BUG修复复查报告.md |
 | UI 预览 | v0.0.2 | preview/versions/v0.0.2.html（液态玻璃风格 + 4 项 Bug 修复面板） |

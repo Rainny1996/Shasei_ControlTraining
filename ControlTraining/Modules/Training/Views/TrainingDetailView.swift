@@ -5,6 +5,11 @@ struct TrainingDetailView: View {
     let method: TrainingMethod
     @ObservedObject var viewModel: TrainingViewModel
     
+    /// 改写「开始训练」按钮行为（需求 12 / AC-12.3）：非空时替换内部 showStartTraining
+    var onStartCoach: ((TrainingMethod) -> Void)? = nil
+    /// 是否允许开始训练（需求 12 / AC-12.5）：已完成项传入 false 仅查看
+    var enableStart: Bool = true
+    
     @State private var selectedTab: DetailTab = .overview
     @State private var showStartTraining = false
     
@@ -86,19 +91,26 @@ struct TrainingDetailView: View {
             }
             
             // 开始训练按钮
-            Button(action: {
-                showStartTraining = true
-            }) {
-                HStack {
-                    Image(systemName: "play.circle.fill")
-                    Text("开始训练")
+            if enableStart {
+                Button(action: {
+                    if let onStartCoach = onStartCoach {
+                        onStartCoach(method)
+                    } else {
+                        showStartTraining = true
+                    }
+                }) {
+                    HStack {
+                        Image(systemName: "play.circle.fill")
+                        Text("开始训练")
+                    }
+                    .font(.headline)
+                    .foregroundColor(.white)
+                    .frame(maxWidth: .infinity)
+                    .padding(.vertical, 14)
+                    .background(Color.accentColor)
+                    .cornerRadius(12)
                 }
-                .font(.headline)
-                .foregroundColor(.white)
-                .frame(maxWidth: .infinity)
-                .padding(.vertical, 14)
-                .background(Color.accentColor)
-                .cornerRadius(12)
+                .accessibilityLabel("开始训练 \(method.name)")
             }
         }
         .padding()

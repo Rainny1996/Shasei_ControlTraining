@@ -94,6 +94,10 @@ class CoachViewModel: ObservableObject {
     /// 最近保存的训练记录ID（用于复盘问卷关联）
     @Published var lastTrainingRecordId: UUID?
     
+    /// 自然完成（非 partial）后的回调，例如标记计划项完成（需求 12 / AC-12.4）
+    /// 仅在 `saveTrainingRecord()` 正常完成时触发；中途退出（partial）不触发。
+    var onTrainingCompleted: (() -> Void)?
+    
     // MARK: - Private Properties
     
     private var timer: Timer?
@@ -359,11 +363,12 @@ class CoachViewModel: ObservableObject {
         }
     }
     
-    /// 停止训练（提前结束）
+    /// 停止训练（提前结束 / 中途退出）
+    /// 保存 **partial** 记录（与后台退出 AC-2.10 一致），**不**触发完成回调（呼应 AC-12.4）。
     func stopTraining() {
         stopTimer()
         audioService.stopAll()
-        completeTraining()
+        completeTrainingAsPartial()
     }
     
     // MARK: - Private Timer Methods
@@ -484,6 +489,26 @@ class CoachViewModel: ObservableObject {
         
         // 自动保存训练记录
         saveTrainingRecord()
+        // 正常完成：通知外部（如标记计划项完成，AC-12.4）
+        onTrainingCompleted?()
+    }
+    
+    /// 中途结束：保存 partial 记录（不触发完成回调，呼应 AC-12.4 / AC-2.10）
+    private func completeTrainingAsPartial() {
+        sessionPhase = .completed
+        showCompletion = true
+        
+        let record = TrainingRecord(
+            methodId: method.id,
+            duration: TimeInterval(elapsedSeconds),
+            completionRate: min(1.0, Double(elapsedSeconds) / Double(totalDuration)),
+            selfRating: 3,
+            notes: "训练中途结束（用户主动结束）",
+            mode: trainingMode,
+            isPartial: true
+        )
+        lastTrainingRecordId = record.id
+        trainingRepository.saveTrainingRecord(record)
     }
     
     /// 保存训练记录

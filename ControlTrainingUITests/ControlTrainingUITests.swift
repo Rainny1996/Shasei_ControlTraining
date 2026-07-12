@@ -44,4 +44,68 @@ final class ControlTrainingUITests: XCTestCase {
         XCTAssertTrue(initialSetup.waitForExistence(timeout: 10),
                       "跳过引导后应进入初始设置页")
     }
+
+    // MARK: - 需求 10 / 11 / 12 入口与控件可达性（XCUI 冒烟）
+
+    /// 辅助：尽力从首屏到达「训练计划」页（容忍首启引导）
+    private func navigateToPlanTab() {
+        let skip = app.buttons["跳过"]
+        if skip.waitForExistence(timeout: 3) { skip.tap() }
+
+        let planTab = app.tabBars.buttons["训练计划"]
+        if planTab.waitForExistence(timeout: 5) {
+            planTab.tap()
+        }
+    }
+
+    /// AC-10.1：自定义计划入口可达（无计划页也提供「自定义计划」按钮，≤2 次点击）
+    func testCustomPlanEntryReachable() {
+        navigateToPlanTab()
+        let custom = app.buttons["自定义计划"]
+        XCTAssertTrue(custom.waitForExistence(timeout: 5),
+                      "计划页应提供「自定义计划」入口（AC-10.1）")
+        custom.tap()
+        XCTAssertTrue(app.staticTexts["组建方式"].waitForExistence(timeout: 5),
+                      "进入自定义计划编辑器应展示「组建方式」（AC-10.1/10.2）")
+    }
+
+    /// AC-10.4：自定义阶段不暴露时长/强度/周期调整入口
+    func testBuilderNoDurationIntensityPeriodControls() {
+        navigateToPlanTab()
+        app.buttons["自定义计划"].tap()
+        XCTAssertTrue(app.staticTexts["组建方式"].waitForExistence(timeout: 5))
+
+        // 不应出现「训练强度」维度
+        XCTAssertFalse(app.staticTexts["训练强度"].exists,
+                       "Builder 不应暴露「训练强度」入口（AC-10.4）")
+        // 不应出现「周期」维度（具体训练日期已提供，周期长度不在本阶段调整）
+        let periodRelated = app.staticTexts.containing(NSPredicate(format: "label CONTAINS '周期'"))
+        XCTAssertEqual(periodRelated.count, 0, "Builder 不应暴露「周期」入口（AC-10.4）")
+
+        // 仅有的维度应为：训练目标 / 难度 / 每周训练天数 / 具体训练日期 / 每日训练方法
+        XCTAssertTrue(app.staticTexts["训练目标"].exists)
+        XCTAssertTrue(app.staticTexts["每周训练天数"].exists)
+        XCTAssertTrue(app.staticTexts["具体训练日期"].exists)
+    }
+
+    /// AC-10.7 / 11.7 / 12.6：关键入口带 VoiceOver 标签且可点击
+    func testKeyEntriesHaveAccessibilityLabels() {
+        navigateToPlanTab()
+        let custom = app.buttons["自定义计划"]
+        XCTAssertTrue(custom.waitForExistence(timeout: 5),
+                      "「自定义计划」入口应存在并带 VoiceOver 标签（AC-10.7）")
+        XCTAssertTrue(custom.isHittable, "「自定义计划」入口可点击（≥44pt 命中区，AC-10.7）")
+
+        // 编辑计划入口（存在活跃计划时）：菜单项含「编辑计划」标签
+        let edit = app.buttons["编辑计划"]
+        if edit.exists {
+            XCTAssertTrue(edit.isHittable, "编辑计划入口可点击（AC-11.1/11.7）")
+        }
+
+        // 今日动作行「查看详情并开始陪练」标签（AC-12.6）
+        let todayRow = app.buttons["查看"]
+        if todayRow.exists {
+            XCTAssertTrue(todayRow.isHittable, "今日动作行可点击进入详情（AC-12.6）")
+        }
+    }
 }
