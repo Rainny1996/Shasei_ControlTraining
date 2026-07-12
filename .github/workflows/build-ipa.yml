@@ -23,7 +23,7 @@ jobs:
 
       - name: Show Environment
         run: |
-          echo "=== List Schemes ==="
+          echo "=== List Targets ==="
           xcodebuild -list -project "毅练/毅练.xcodeproj" || true
 
       - name: Clean Build
@@ -36,7 +36,7 @@ jobs:
           set -o pipefail
           xcodebuild build \
             -project "毅练/毅练.xcodeproj" \
-            -scheme "毅练" \
+            -target "毅练" \
             -configuration Release \
             -destination 'generic/platform=iOS' \
             -derivedDataPath build \
