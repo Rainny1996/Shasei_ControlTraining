@@ -74,7 +74,7 @@ final class Tests需求11逐条编辑: XCTestCase {
 
     /// AC-11.2 替换方法 / 改时长 / 改日期：编辑落内存草稿，保存走 updatePlanItems，进度重算
     func testEditViaDraftReflectsAndRecomputes() {
-        let plan = seedPlan(completedIndices: [0, 1, 2]) // 全部完成 → 1.0
+        _ = seedPlan(completedIndices: [0, 1, 2]) // 全部完成 → 1.0
         let vm = PlanViewModel(planRepository: repo,
                                trainingRepository: TrainingRepository(dataController: dc))
         vm.loadPlan()
@@ -95,7 +95,7 @@ final class Tests需求11逐条编辑: XCTestCase {
 
     /// AC-11.3 删除：编辑态在内存草稿删项，保存走 updatePlanItems，进度重算
     func testRemoveViaDraftUpdatesItemsAndProgress() {
-        let plan = seedPlan(completedIndices: [0]) // 1/3
+        _ = seedPlan(completedIndices: [0]) // 1/3
         let vm = PlanViewModel(planRepository: repo,
                                trainingRepository: TrainingRepository(dataController: dc))
         vm.loadPlan()
@@ -174,7 +174,7 @@ final class Tests需求11逐条编辑: XCTestCase {
         let vm = PlanViewModel(planRepository: repo,
                                trainingRepository: TrainingRepository(dataController: dc))
         // 预置活跃计划以便进入编辑
-        let plan = seedPlan()
+        _ = seedPlan()
         vm.loadPlan()
         vm.beginPlanEditing()
         XCTAssertNotNil(vm.editingDraft)

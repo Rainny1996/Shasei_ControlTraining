@@ -2,7 +2,6 @@ import Foundation
 import Combine
 import SwiftUI
 import AVFoundation
-import UIKit
 
 // MARK: - 训练会话阶段
 
@@ -138,9 +137,6 @@ class CoachViewModel: ObservableObject {
         
         // AC-2.9: 音频中断监听
         setupAudioInterruptionObserver()
-        
-        // AC-2.10: 后台/强制退出 — 保存部分记录
-        setupBackgroundObserver()
     }
     
     deinit {
@@ -167,12 +163,13 @@ class CoachViewModel: ObservableObject {
                     self.pauseTraining()
                 }
             case .ended:
-                // 音频恢复 → 提示用户手动恢复
+                // 音频中断结束
                 if let optionsValue = notification.userInfo?[AVAudioSessionInterruptionOptionKey] as? UInt {
                     let options = AVAudioSession.InterruptionOptions(rawValue: optionsValue)
                     if options.contains(.shouldResume) {
-                        // 音频已恢复，但训练保持暂停，由用户手动恢复
-                        break
+                        // 音频会话已恢复：重新激活以继续后台语音播报；
+                        // 训练仍保持暂停，由用户手动恢复（呼应 AC-2.9）
+                        self?.audioService.configureBackgroundPlayback()
                     }
                 }
             @unknown default: break
@@ -180,36 +177,7 @@ class CoachViewModel: ObservableObject {
         }
     }
     
-    /// AC-2.10: 强制退出 → 生成部分训练记录
-    private func setupBackgroundObserver() {
-        NotificationCenter.default.addObserver(
-            forName: UIApplication.willResignActiveNotification,
-            object: nil,
-            queue: .main
-        ) { [weak self] _ in
-            guard let self = self,
-                  self.sessionPhase == .training || self.sessionPhase == .paused
-            else { return }
-            
-            // 保存部分训练记录（isPartial=true, completed=false）
-            self.savePartialRecordOnBackground()
-        }
-    }
-    
-    /// 保存部分训练记录
-    private func savePartialRecordOnBackground() {
-        let record = TrainingRecord(
-            methodId: method.id,
-            duration: TimeInterval(elapsedSeconds),
-            completionRate: completionRate,
-            selfRating: 3,
-            notes: "训练未完成（强制退出或切后台中断）",
-            mode: trainingMode,
-            isPartial: true
-        )
-        trainingRepository.saveTrainingRecord(record)
-    }
-    
+
     // MARK: - Phase Sequence Generation
     
     /// 根据训练模式生成阶段序列

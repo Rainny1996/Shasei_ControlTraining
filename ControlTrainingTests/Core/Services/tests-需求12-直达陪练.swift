@@ -86,15 +86,15 @@ final class Tests需求12直达陪练: XCTestCase {
         let i2 = PlanItem(date: start, methodId: m.id, methodName: m.name, duration: 300, isCompleted: false)
         let plan = TrainingPlan(startDate: start, endDate: end, items: [i1, i2])
         repo.saveTrainingPlan(plan)
-        waitUntil { self.repo.fetchActivePlan() != nil }
+        waitUntil { repo.fetchActivePlan() != nil }
         vm.loadPlan()
 
-        XCTAssertEqual(vm.currentPlan?.progress, 0.5, accuracy: 0.001, "初始进度 1/2")
+        XCTAssertEqual(vm.currentPlan!.progress, 0.5, accuracy: 0.001, "初始进度 1/2")
 
         vm.markItemCompleted(i2.id)
         XCTAssertTrue(vm.currentPlan?.items.first(where: { $0.id == i2.id })?.isCompleted == true,
                       "标记后该项应已完成")
-        XCTAssertEqual(vm.currentPlan?.progress, 1.0, accuracy: 0.001, "全部完成进度应为 1.0")
+        XCTAssertEqual(vm.currentPlan!.progress, 1.0, accuracy: 0.001, "全部完成进度应为 1.0")
     }
 
     func testMarkItemCompletedIdempotent() {
@@ -110,12 +110,12 @@ final class Tests需求12直达陪练: XCTestCase {
         let i2 = PlanItem(date: start, methodId: m.id, methodName: m.name, duration: 300, isCompleted: false)
         let plan = TrainingPlan(startDate: start, endDate: end, items: [i1, i2])
         repo.saveTrainingPlan(plan)
-        waitUntil { self.repo.fetchActivePlan() != nil }
+        waitUntil { repo.fetchActivePlan() != nil }
         vm.loadPlan()
 
         vm.markItemCompleted(i2.id)
         vm.markItemCompleted(i2.id) // 再次调用
-        XCTAssertEqual(vm.currentPlan?.progress, 1.0, accuracy: 0.001, "幂等：重复调用进度不变")
+        XCTAssertEqual(vm.currentPlan!.progress, 1.0, accuracy: 0.001, "幂等：重复调用进度不变")
     }
 
     // MARK: - AC-12.5 已完成项点击仅查看，不触发新陪练
@@ -132,7 +132,7 @@ final class Tests需求12直达陪练: XCTestCase {
         let done = PlanItem(date: start, methodId: m.id, methodName: m.name, duration: 300, isCompleted: true)
         let plan = TrainingPlan(startDate: start, endDate: end, items: [done])
         repo.saveTrainingPlan(plan)
-        waitUntil { self.repo.fetchActivePlan() != nil }
+        waitUntil { repo.fetchActivePlan() != nil }
         vm.loadPlan()
 
         vm.openPlanItemDetail(done)
@@ -156,8 +156,6 @@ final class PlanItemDetailIntegrationTests: XCTestCase {
     func testPlanItemDetailViewRendersNonCompleted() {
         let dc = DataController(inMemory: true)
         let repo = PlanRepository(dataController: dc)
-        let vm = PlanViewModel(planRepository: repo,
-                               trainingRepository: TrainingRepository(dataController: dc))
 
         let m = TrainingContentData.allTrainingMethods().first!
         let item = PlanItem(date: Date(), methodId: m.id, methodName: m.name, duration: 300)
