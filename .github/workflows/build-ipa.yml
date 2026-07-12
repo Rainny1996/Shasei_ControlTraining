@@ -38,8 +38,10 @@ jobs:
             -project "毅练/毅练.xcodeproj" \
             -target "毅练" \
             -configuration Release \
-            -destination 'generic/platform=iOS' \
+            -sdk iphoneos \
+            -arch arm64 \
             -derivedDataPath build \
+            BUILD_DIR="$PWD/build-output" \
             CODE_SIGNING_ALLOWED=NO \
             CODE_SIGNING_REQUIRED=NO \
             CODE_SIGN_IDENTITY="" \
@@ -51,14 +53,18 @@ jobs:
         if: always()
         run: |
           echo "=== .app files ==="
-          find build -name "*.app" 2>/dev/null || echo "No .app files found"
+          find build-output -name "*.app" 2>/dev/null || echo "No .app files found in build-output"
+          find build -name "*.app" 2>/dev/null || echo "No .app files found in build"
           echo ""
           echo "=== Build products directory ==="
-          ls -laR build/Build/Products/ 2>/dev/null || echo "Products directory not found"
+          ls -laR build-output/Release-iphoneos/ 2>/dev/null || echo "Products directory not found"
 
       - name: Create IPA
         run: |
-          APP_PATH=$(find build -name "毅练.app" | head -1)
+          APP_PATH=$(find build-output -name "毅练.app" | head -1)
+          if [ -z "$APP_PATH" ]; then
+            APP_PATH=$(find build -name "毅练.app" | head -1)
+          fi
           if [ -z "$APP_PATH" ]; then
             echo "ERROR: Could not find 毅练.app"
             echo "=== Build errors (grep) ==="
