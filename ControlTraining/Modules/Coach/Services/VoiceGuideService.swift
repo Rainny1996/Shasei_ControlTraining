@@ -72,6 +72,8 @@ class VoiceGuideService {
             audioService.announceRelax()
         case .rest:
             audioService.announceRest()
+        case .stimulate, .pause:
+            break  // 逐动作语音由 announceCurrentPhase 播报
         }
     }
     

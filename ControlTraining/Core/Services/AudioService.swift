@@ -138,7 +138,7 @@ class AudioService {
 // MARK: - Breath Phase
 
 /// 呼吸阶段
-enum BreathPhase {
+enum BreathPhase: String, Codable {
     case inhale   // 吸气
     case hold     // 屏住
     case exhale   // 呼气

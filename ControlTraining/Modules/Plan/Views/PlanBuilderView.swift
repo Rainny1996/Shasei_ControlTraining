@@ -263,7 +263,7 @@ struct PlanBuilderView: View {
                             .font(.caption)
                             .foregroundColor(.secondary)
                     } else {
-                        let names = day.methodSelections.compactMap { sel in
+                        let names: [String] = day.methodSelections.compactMap { sel in
                             guard let m = TrainingContentData.allTrainingMethods().first(where: { $0.id == sel.methodId }) else { return nil }
                             // 展示「方法名 · 所选专属模式」（AC-13.7）
                             let modeName = sel.modeId.flatMap { mid in

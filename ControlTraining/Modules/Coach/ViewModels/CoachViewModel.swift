@@ -16,7 +16,7 @@ enum TrainingSessionPhase {
 // MARK: - 训练动作阶段
 
 /// 训练中的动作阶段
-enum TrainingActionPhase {
+enum TrainingActionPhase: String, Codable {
     case contract     // 收缩
     case relax        // 放松
     case rest         // 休息
@@ -128,6 +128,22 @@ class CoachViewModel: ObservableObject {
         let instruction: String    // 逐动作语音文案（MethodMode 步骤 voiceInstruction）
         let label: String          // 显示标签（MethodMode 步骤 label）
         let modeStep: ModeActionStep?  // 来源步骤（用于逐动作语音；遗留路径为 nil）
+
+        init(action: TrainingActionPhase,
+             duration: Int,
+             breathPhase: BreathPhase,
+             breathDuration: Int,
+             instruction: String = "",
+             label: String = "",
+             modeStep: ModeActionStep? = nil) {
+            self.action = action
+            self.duration = duration
+            self.breathPhase = breathPhase
+            self.breathDuration = breathDuration
+            self.instruction = instruction
+            self.label = label
+            self.modeStep = modeStep
+        }
     }
     
     // MARK: - Initialization
