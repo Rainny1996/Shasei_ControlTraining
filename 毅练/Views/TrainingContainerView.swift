@@ -26,7 +26,8 @@ struct TrainingContainerView: View {
                     totalCycles: vm.totalCycles,
                     isFinal: isFinal,
                     onReachedSeven: vm.onReachedSeven,
-                    onEjaculateReady: isFinal ? vm.onEjaculateReady : nil
+                    onEjaculateReady: isFinal ? vm.onEjaculateReady : nil,
+                    onEjaculated: vm.onEjaculated
                 )
             case .stopWaiting:
                 StopWaitingView(
@@ -34,7 +35,8 @@ struct TrainingContainerView: View {
                     cycle: vm.cycle,
                     totalCycles: vm.totalCycles,
                     onFallBackConfirmed: vm.onFallBackConfirmed,
-                    onDoubleFingerHold: vm.onDoubleFingerHold
+                    onDoubleFingerHold: vm.onDoubleFingerHold,
+                    onEjaculated: vm.onEjaculated
                 )
             case .squeeze:
                 SqueezeView(

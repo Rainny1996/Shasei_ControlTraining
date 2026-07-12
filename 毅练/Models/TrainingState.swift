@@ -41,5 +41,6 @@ enum TrainingEvent {
     case timeout             // 超时（10秒监控 / 3分钟唤醒）
     case doubleFingerHold    // 双指长按1秒
     case prematureEjaculation // 未刹车就射精
+    case ejaculated            // 中途射精，结束并记录训练
     case continueWaiting      // 回落超时后继续等待（再延长30秒，仅限一次）
 }

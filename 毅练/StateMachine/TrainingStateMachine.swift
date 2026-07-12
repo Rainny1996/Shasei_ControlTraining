@@ -71,6 +71,9 @@ final class TrainingStateMachine: ObservableObject {
         case (.controlZone, .prematureEjaculation):
             prematureEjaculation = true
             finish()
+        case (.controlZone, .ejaculated), (.stopWaiting, .ejaculated):
+            prematureEjaculation = true
+            finish()
         default:
             break
         }

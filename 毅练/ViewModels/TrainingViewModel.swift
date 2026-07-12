@@ -81,6 +81,12 @@ final class TrainingViewModel: ObservableObject {
     func onSqueezeEnd() { haptic.warning(); end() }
     func onEjaculateReady() { haptic.tap(); machine.send(.ejaculateReady) }
     func onPremature() { haptic.warning(); machine.send(.prematureEjaculation) }
+    /// 中途射精：标记提前射精并记录训练，进入完成页
+    func onEjaculated() {
+        haptic.warning()
+        machine.send(.ejaculated)
+        lastSession = CoreDataStack.shared.insertSession(from: machine)
+    }
 
     // MARK: - 挤捏法弹窗
     func showSqueezePromptIfNeeded() {

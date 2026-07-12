@@ -7,10 +7,29 @@ struct ControlZoneView: View {
     let isFinal: Bool
     let onReachedSeven: () -> Void
     let onEjaculateReady: (() -> Void)?  // 仅最后一轮
+    let onEjaculated: () -> Void         // 右上角：中途射精，结束并记录
 
     var body: some View {
         ZStack {
             Color.ylYellow.ignoresSafeArea()
+            // 右上角：中途射精按钮
+            VStack {
+                HStack {
+                    Spacer()
+                    Button(action: onEjaculated) {
+                        Text("我已射精")
+                            .font(.system(size: 13, weight: .medium))
+                            .foregroundColor(.black.opacity(0.55))
+                            .padding(.horizontal, 14)
+                            .padding(.vertical, 8)
+                            .background(Color.black.opacity(0.08))
+                            .cornerRadius(16)
+                    }
+                    .padding(.top, 16)
+                    .padding(.trailing, 16)
+                }
+                Spacer()
+            }
             VStack(spacing: 24) {
                 Spacer()
                 Text("快感可控（4-6分）")

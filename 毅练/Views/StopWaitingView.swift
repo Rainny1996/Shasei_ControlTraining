@@ -7,6 +7,7 @@ struct StopWaitingView: View {
     let totalCycles: Int
     let onFallBackConfirmed: () -> Void
     let onDoubleFingerHold: () -> Void
+    let onEjaculated: () -> Void         // 右上角：中途射精，结束并记录
 
     var body: some View {
         ZStack {
@@ -18,6 +19,24 @@ struct StopWaitingView: View {
                         .simultaneously(with: LongPressGesture(minimumDuration: 1.0))
                         .onEnded { _ in onDoubleFingerHold() }
                 )
+            // 右上角：中途射精按钮（独立层，不受背景手势影响）
+            VStack {
+                HStack {
+                    Spacer()
+                    Button(action: onEjaculated) {
+                        Text("我已射精")
+                            .font(.system(size: 13, weight: .medium))
+                            .foregroundColor(.white.opacity(0.85))
+                            .padding(.horizontal, 14)
+                            .padding(.vertical, 8)
+                            .background(Color.white.opacity(0.15))
+                            .cornerRadius(16)
+                    }
+                    .padding(.top, 16)
+                    .padding(.trailing, 16)
+                }
+                Spacer()
+            }
             VStack(spacing: 24) {
                 Spacer()
                 Text("停止一切刺激")
