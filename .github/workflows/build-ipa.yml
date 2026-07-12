@@ -1,0 +1,95 @@
+name: Build 毅练 IPA
+
+on:
+  push:
+    branches: [main]
+  workflow_dispatch:
+
+jobs:
+  build:
+    name: Build IPA (无签名)
+    runs-on: macos-15
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup Xcode
+        uses: maxim-lobanov/setup-xcode@v1
+        with:
+          xcode-version: '16.2'
+
+      - name: Show Environment
+        run: |
+          echo "=== Xcode Version ==="
+          xcodebuild -version
+          echo ""
+          echo "=== List Schemes ==="
+          xcodebuild -list -project "毅练/毅练.xcodeproj"
+
+      - name: Clean Build
+        run: |
+          rm -rf build
+          rm -rf ~/Library/Developer/Xcode/DerivedData/毅练-*
+
+      - name: Build App (无签名)
+        run: |
+          set -o pipefail
+          xcodebuild build \
+            -project "毅练/毅练.xcodeproj" \
+            -scheme "毅练" \
+            -configuration Release \
+            -destination 'generic/platform=iOS' \
+            -derivedDataPath build \
+            CODE_SIGNING_ALLOWED=NO \
+            CODE_SIGNING_REQUIRED=NO \
+            CODE_SIGN_IDENTITY="" \
+            DEVELOPMENT_TEAM="" \
+            ENABLE_BITCODE=NO \
+            2>&1 | tee build.log
+
+      - name: Debug - List build products
+        if: always()
+        run: |
+          echo "=== .app files ==="
+          find build -name "*.app" 2>/dev/null || echo "No .app files found"
+          echo ""
+          echo "=== Build products directory ==="
+          ls -laR build/Build/Products/ 2>/dev/null || echo "Products directory not found"
+
+      - name: Create IPA
+        run: |
+          APP_PATH=$(find build -name "毅练.app" | head -1)
+          if [ -z "$APP_PATH" ]; then
+            echo "ERROR: Could not find 毅练.app"
+            echo "=== Build errors (grep) ==="
+            grep -E "error:|warning:|fatal:" build.log | head -50 || echo "No error lines found"
+            echo ""
+            echo "=== Last 150 lines of build log ==="
+            tail -150 build.log
+            exit 1
+          fi
+          echo "Found app at: $APP_PATH"
+          # 移除测试包 PlugIns（避免重签名问题）
+          rm -rf "$APP_PATH"/PlugIns 2>/dev/null || true
+          mkdir -p Payload
+          cp -r "$APP_PATH" Payload/
+          zip -r 毅练.ipa Payload
+          echo "IPA created successfully"
+          ls -la 毅练.ipa
+
+      - name: Upload IPA
+        uses: actions/upload-artifact@v4
+        if: success()
+        with:
+          name: 毅练-ipa
+          path: 毅练.ipa
+          retention-days: 30
+
+      - name: Upload build log on failure
+        uses: actions/upload-artifact@v4
+        if: failure()
+        with:
+          name: build-log
+          path: build.log
+          retention-days: 7
