@@ -30,11 +30,23 @@ jobs:
           echo "PROJECT_FILE=$PROJECT_FILE" >> "$GITHUB_OUTPUT"
           echo "Found project at: $PROJECT_FILE"
 
+      - name: Rename xcodeproj to ASCII & fix references
+        run: |
+          # 将中文 .xcodeproj 目录重命名为纯 ASCII，验证是否是中文路径导致 Xcode 解析崩溃
+          OLD_NAME="毅练.xcodeproj"
+          NEW_NAME="YiLian.xcodeproj"
+          echo "Renaming $OLD_NAME -> $NEW_NAME"
+          mv "$OLD_NAME" "$NEW_NAME"
+
+          # 修改 pbxproj 内部引用：把 毅练/Info.plist 改为 ASCII 路径
+          # 源码目录仍然是 毅练/，但 .xcodeproj 名改为 ASCII
+          echo "=== pbxproj 内部路径引用 ==="
+          grep -n "毅练" "$NEW_NAME/project.pbxproj" | head -20
+
       - name: Create workspace manually
         run: |
-          PROJECT_FILE="${{ steps.locate.outputs.PROJECT_FILE }}"
-          # 手动构造 workspace，引用 .xcodeproj 的绝对路径
-          ABS_PROJECT=$(cd "$(dirname "$PROJECT_FILE")" && pwd)/$(basename "$PROJECT_FILE")
+          # 用 ASCII 路径
+          ABS_PROJECT="$(pwd)/YiLian.xcodeproj"
           echo "Absolute project path: $ABS_PROJECT"
 
           mkdir -p YiLian.xcworkspace
