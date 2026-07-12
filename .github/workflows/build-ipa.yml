@@ -14,38 +14,41 @@ jobs:
       - name: Checkout
         uses: actions/checkout@v4
 
-      # 将中文项目路径重命名为 ASCII 路径，规避 xcodebuild 对中文路径的解析问题
-      - name: Rename project to ASCII path
+      - name: Diagnostics - Environment
         run: |
-          mv "毅练" YiLian
-          mv "毅练.xcodeproj" YiLian.xcodeproj
-          echo "=== Renamed structure ==="
+          echo "=== pwd ==="
+          pwd
+          echo "=== ls -la (root) ==="
           ls -la
-          ls -la YiLian.xcodeproj
+          echo "=== git ls-files ==="
+          git ls-files | head -50
+          echo "=== locale ==="
+          locale
+          echo "=== available Xcode.app ==="
+          ls -d /Applications/Xcode*.app 2>/dev/null || echo "NONE"
+          echo "=== xcodebuild path ==="
+          which xcodebuild
 
       - name: Select Xcode
         run: |
-          XCODE_PATH=$(ls -d /Applications/Xcode*.app | head -1)
-          echo "Found Xcode at: $XCODE_PATH"
-          sudo xcode-select -switch "$XCODE_PATH"
+          sudo xcode-select -switch /Applications/Xcode.app
           xcodebuild -version
+          echo "DEVELOPER_DIR=$DEVELOPER_DIR"
 
-      - name: Show Environment
+      - name: Diagnostics - xcodebuild list
         run: |
-          echo "=== List Targets ==="
-          xcodebuild -list -project "YiLian.xcodeproj"
-          echo "=== List all Xcode.app ==="
-          ls -d /Applications/Xcode*.app
+          echo "=== xcodebuild -list ==="
+          xcodebuild -list -project "毅练/毅练.xcodeproj" || echo "LIST FAILED with code $?"
 
       - name: Clean Build
         run: |
           rm -rf build build-output
-          rm -rf ~/Library/Developer/Xcode/DerivedData/YiLian-*
+          rm -rf ~/Library/Developer/Xcode/DerivedData/* || true
 
       - name: Build App (无签名)
         run: |
           xcodebuild build \
-            -project "YiLian.xcodeproj" \
+            -project "毅练/毅练.xcodeproj" \
             -target "毅练" \
             -configuration Release \
             -sdk iphoneos \
@@ -58,7 +61,7 @@ jobs:
             DEVELOPMENT_TEAM="" \
             ENABLE_BITCODE=NO \
             > build.log 2>&1 || {
-              echo "========== BUILD FAILED =========="
+              echo "========== BUILD FAILED (exit $?) =========="
               cat build.log
               exit 1
             }
@@ -68,9 +71,10 @@ jobs:
       - name: Debug - List build products
         if: always()
         run: |
-          echo "=== .app files ==="
-          find build-output -name "*.app" 2>/dev/null || echo "No .app files found in build-output"
-          find build -name "*.app" 2>/dev/null || echo "No .app files found in build"
+          echo "=== .app files in build-output ==="
+          find build-output -name "*.app" 2>/dev/null || echo "none"
+          echo "=== .app files in build ==="
+          find build -name "*.app" 2>/dev/null || echo "none"
 
       - name: Create IPA
         run: |
@@ -80,10 +84,9 @@ jobs:
           fi
           if [ -z "$APP_PATH" ]; then
             echo "ERROR: Could not find 毅练.app"
-            echo "=== Build errors (grep) ==="
-            grep -E "error:|warning:|fatal:" build.log | head -50 || echo "No error lines found"
-            echo ""
-            echo "=== Last 150 lines of build log ==="
+            echo "=== grep errors ==="
+            grep -E "error:|fatal:" build.log | head -50 || echo "none"
+            echo "=== tail build.log ==="
             tail -150 build.log
             exit 1
           fi
@@ -92,7 +95,7 @@ jobs:
           mkdir -p Payload
           cp -r "$APP_PATH" Payload/
           zip -r YiLian.ipa Payload
-          echo "IPA created successfully"
+          echo "IPA created"
           ls -la YiLian.ipa
 
       - name: Upload IPA
