@@ -84,7 +84,7 @@ struct PlanItem: Identifiable, Equatable {
 
 /// 单日草稿：某个训练日及其方法（需求 10 / Q3 支持一日多方法）
 struct DayDraft: Identifiable, Hashable {
-    let id: UUID
+    let id: UUID = UUID()
     var dayOffset: Int        // 0...6，相对 plan.startDate 的星期偏移
     var methodIds: [UUID]      // 该日选择的训练方法（≥1，支持多方法）
 }
@@ -128,7 +128,7 @@ struct PlanEditDraft {
 
 /// 模板中的单日定义（需求 10 / Q3 支持一日多方法）
 struct UserPlanTemplateDay: Codable, Identifiable, Hashable {
-    let id: UUID
+    let id: UUID = UUID()
     var dayOffset: Int        // 0...6
     var methodIds: [UUID]      // 该日方法（≥1）
 }

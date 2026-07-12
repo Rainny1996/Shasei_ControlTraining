@@ -65,7 +65,7 @@ struct PlanBuilderView: View {
                     let name = templateName.trimmingCharacters(in: .whitespaces)
                     if !name.isEmpty {
                         viewModel.customPlanDraft.name = name
-                        viewModel.saveCurrentDraftAsTemplate(name)
+                        viewModel.saveCurrentDraftAsTemplate(name: name)
                     }
                     templateName = ""
                 }

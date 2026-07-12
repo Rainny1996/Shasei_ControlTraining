@@ -1,8 +1,9 @@
 # 设计文档（v2.0 正式版）
 
-> **文档状态**：v2.0（对齐需求文档 v2.0，全量 AC 覆盖）＋ v2.1 训练计划增强设计（需求 10/11/12，决策已冻结）
+> **文档状态**：v2.0（对齐需求文档 v2.0，全量 AC 覆盖）＋ v2.1 训练计划增强设计（需求 10/11/12，决策已冻结）＋ v2.2 修订（Q6 反转）＋ v2.3 训练陪练增强设计（需求 13，草案待评审）
 > **最后更新**：2026-07-12
 > **说明**：第二轮重写的设计基线——①落地需求 3/6 的算法规格（消除黑盒）；②更正安全设计与代码真实缺陷（BUG-CT-01/03/04/06）的一致性；③补充需求 8/9、合规、无障碍、iCloud 排除的设计；④数据模型补强校验与状态字段；⑤建立 AC 追溯映射实现"需求→设计→缺陷"闭环；⑥v2.1 新增 §5 训练计划增强设计（需求 10/11/12），沉淀三种计划相关需求的完整交互流/数据契约/服务与视图模型契约，并固化 Q1–Q6 决策记录（原 `design-需求10/11/12` 已归档至 `docs/archive/plan-v2.1/`）。
+⑦v2.3 新增 §5.5 训练陪练增强设计（需求 13，草案待评审）：方法专属模式目录 `MethodMode`/`ModeActionStep`、`CoachViewModel` 逐动作语音、`DayDraft`/`UserPlanTemplateDay` per-method 模式升级、`AnalysisService` 按 `modeName` 聚合，并补录 Q7–Q9 决策（草案待评审）。
 
 ### 修订历史
 
@@ -12,6 +13,8 @@
 | v2.0 | 2026-07-11 | **本轮重写**：①新增 §2.6 算法规格（映射表+加权模型）；②更正 §2.4 安全设计（单一加密入口、单一后台锁注册、后台模糊而非截屏模糊、NSFileProtectionComplete 正确写法）；③新增 §2.1.4 数据管理页、§2.1.5 合规页、§2.7 无障碍设计；④数据模型补 selfRating 校验、CheckInStatus 枚举、AnalysisConfig、部分记录分支；⑤补充 iCloud 排除；⑥复盘提升为独立 Tab；⑦建立 §4 AC 追溯映射表 |
 | v2.1 | 2026-07-12 | **训练计划增强设计（需求 10/11/12，决策已冻结）**：①数据层——`PlanModels.swift` 新增 `UserPlanTemplate`（`days:[UserPlanTemplateDay]`，Q3 支持一日多方法；保留 `methodIds`/`trainingDayOffsets` 计算属性 + `description`）+ `PlanDraft`（按日 `dayDrafts`）；`*.xcdatamodeld` 新增 `CDUserPlanTemplate`（`daysData` Binary JSON，整库排除 iCloud）；`CDUserPlanTemplate+CoreDataClass.swift`；`PlanRepository` 仅新增 `saveUserTemplate`/`fetchUserTemplates`/`deleteUserTemplate`（Q6：不新增单条增删改）；`PlanService` 新增 `buildCustomPlan(dayDrafts:baseTemplate:goal:)`/`draftFromTemplate`/`draftFromUserTemplate`/`allTemplatesForSelection`/`saveUserTemplate`/`loadUserTemplates`。②**完整设计沉淀于 §5**（交互流/数据契约/服务与视图模型契约 + Q1–Q6 决策记录），原 `design-需求10/11/12` 已归档至 `docs/archive/plan-v2.1/` |
 | v2.1.1 | 2026-07-12 | 文档整理：将 `docs/ai-workflow/plan-v2.1/` 下的 v2.1 设计草案（需求 10/11/12 设计规格 + 01~04 分工 Prompt）**完整合并**进本文件 §5（含 AC 映射/流程图/数据模型/契约/决策记录，自包含），原文件归档至 `docs/archive/plan-v2.1/`（含 MANIFEST，作快照）；`open-questions.md`/`BUG-TASK-ASSIGNMENT.md` 保留原位并标注已完成 |
+| v2.2 | 2026-07-12 | **Q6 修订（以需求文档为准）**：需求 11 明确要求「单条增删改能力」且 §10 追溯为 `PlanRepository` 单条增删改，故 §5.2 契约补充 `addPlanItem`/`updatePlanItem`/`removePlanItem` 并保留既有实现；修订 Q6 决策记录（由「不提供单条方法」改为「提供」）。文档覆盖需求数更新为 13（含陪练增强需求 13，设计待补） |
+| v2.3 | 2026-07-12 | **需求 13 设计（草案待评审）**：新增 §5.5 训练陪练增强设计——①数据模型新增 `MethodMode`/`ModeActionStep`（`TrainingMethod.trainingModes`），`TrainingRecord`/`PlanItem` 加可空 `modeId`/`modeName`；②`CoachViewModel` 阶段由 `MethodMode.steps` 生成、逐动作播报 `VoiceGuideService.announceActionInstruction`；③计划 `DayDraft`/`UserPlanTemplateDay` 由扁平 `methodIds` 升级为 `methodSelections:[(methodId, modeId?)]`（per-method，保留 Q3 一日多方法）；④`AnalysisService` 按 `modeName` 聚合（回退 `mode.rawValue`）；补录 Q7–Q9 决策（草案待评审） |
 
 ---
 
@@ -28,6 +31,7 @@
   - 语音引导：**系统 TTS（`AVSpeechSynthesizer`）实时合成中文（zh-CN）**
   - 关键节点辅以**预录短音效**（Resources/Sounds）
   - 音频会话**统一在 `AudioService` 配置**（`.playback` + `.spokenAudio` + `.duckOthers` + `.allowBluetooth` + `.mixWithOthers`），禁止在 `AppDelegate` 或 `SecurityService` 重复配置（呼应 BUG-CT-06）
+  - 逐动作语音：`VoiceGuideService.announceActionInstruction(_:)` 按 `ModeActionStep.voiceInstruction` 播报（需求 13 / AC-13.4），替代通用"收缩/放松/休息"提示
 - **通知服务**：UserNotifications（本地通知，非推送）
 - **认证服务**：LocalAuthentication（Face ID/Touch ID）
 - **加密**：CryptoKit AES-256-GCM，**统一由 `CryptoService` 单一密钥入口**（消除 BUG-CT-03 双密钥风险）
@@ -102,7 +106,7 @@ App
 
 **训练方法页**：分类列表（类型+难度筛选）、详情页（原理/步骤图解/注意事项/**禁忌人群 AC-C.5**/**来源标注 AC-C.2**）、收藏入口（≤2 次点击）。
 
-**陪练页**：训练模式选择（基础/渐进/间歇）、倒计时准备（默认 5s 可配 3–10s）、环形计时器（≥60fps）、呼吸引导动画、TTS 语音状态指示、暂停/继续、**来电中断暂停提示（AC-2.9）**。
+**陪练页**：**方法专属训练模式选择**（按所选方法动态加载 `TrainingMethod.trainingModes`，默认首个，替代全局统一的基础/渐进/间歇，需求 13 / AC-13.2）、倒计时准备（默认 5s 可配 3–10s）、环形计时器（≥60fps）、逐动作语音与呼吸引导动画（需求 13 / AC-13.4 / AC-13.5）、TTS 语音状态指示、暂停/继续、**来电中断暂停提示（AC-2.9）**。
 
 **计划页**：当前计划概览、日历视图、进度、**评估问卷入口**、手动调整、动态调整记录。
 
@@ -171,6 +175,8 @@ erDiagram
     User ||--|| AbilityProfile : has
     User ||--o| AnalysisConfig : configures
     TrainingMethod ||--o{ TrainingRecord : used_in
+    TrainingMethod ||--o{ MethodMode : has
+    MethodMode ||--o{ ModeActionStep : contains
     TrainingPlan ||--o{ PlanItem : contains
     TrainingRecord ||--o{ ReviewNote : has
 ```
@@ -179,12 +185,20 @@ erDiagram
 
 **User**：id(UUID)、createdAt(Date)、assessmentCompleted(Bool)、settings(UserData)
 
-**TrainingMethod**：id、name、category、difficulty、description、steps、duration、isFavorite、**source(来源标注 AC-C.2)**、**contraindication(禁忌人群 AC-C.5)**
+**TrainingMethod**：id、name、category、difficulty、description、steps、duration、isFavorite、**source(来源标注 AC-C.2)**、**contraindication(禁忌人群 AC-C.5)**、**trainingModes:[MethodMode](方法专属模式目录，需求 13 / AC-13.1)**
 
 **TrainingRecord**：id、methodId、date、duration、completionRate(Double)、
 - `selfRating: Int` —— **init 内强制 1–5（`clamped`/precondition，呼应 BUG-CT-05 / AC-5.7）**
 - `isPartial: Bool` —— 强制退出生成的部分记录（AC-2.10），`completed=false` 不计入有效打卡
+- `mode: TrainingMode` —— **遗留枚举保留**（被大量源码/测试引用，不删，兼容旧入口）
+- `modeId: UUID?` / `modeName: String?` —— **新增（需求 13 / AC-13.7 / AC-13.9）**：方法专属模式标识；空则 `AnalysisService` 回退 `mode.rawValue`
 - notes
+
+**MethodMode（新增，需求 13 / AC-13.1~13.3）**：id、name（如"慢速收缩"）、difficulty、`modeDescription`（节奏要点）、`steps:[ModeActionStep]`（每模式 ≥2 步骤）。由 `TrainingContentData` 内置静态目录提供，纯内存、不落 Core Data。
+
+**ModeActionStep（新增，需求 13 / AC-13.3）**：id、`order`、`type`（动作类型：收缩/放松/休息/**刺激/暂停**，扩展 `TrainingActionPhase` 分类，用于配色与图标）、`label`（显示标签，如"慢缩3秒"）、`voiceInstruction`（独立语音文案，如"收缩骨盆底肌，向上向内提起，保持三秒"）、`durationSec`、`breathInstruction?`（可选呼吸引导文案）、`breathPhase?`（可选联动 `BreathPhase`）。
+
+> 五方法模式目录（凯格尔/停-动/挤压/呼吸/骨盆底肌综合）与 `TrainingContentData` 各方法说明一致，语音文案仅作动作引导、不含医疗诊断（AC-13.10）。
 
 **TrainingPlan**：id、startDate、endDate、items[PlanItem]、progress、**adjustmentLog[Adjustment]（动态调整记录 AC-3.6）**
 
@@ -214,7 +228,7 @@ erDiagram
 #### 2.3.1 训练陪练流程（含部分记录）
 
 ```
-选择训练方法 → 选择模式 → 倒计时准备 →
+选择训练方法 → 选择**方法专属模式**（按方法动态加载 `trainingModes`，需求 13 / AC-13.2） → 倒计时准备 →
 训练中（TTS + 计时 + 呼吸动画，支持暂停/继续） →
 ├─ 正常结束 → 自动记录(completed=true) → 弹出复盘问卷
 └─ 强制退出/来电中断 → 生成部分记录(isPartial=true, completed=false) → 不弹复盘，不计入有效打卡（AC-2.10）
@@ -345,6 +359,10 @@ S = Σ(w_i × D_i)，Σw_i = 1
 | 需求 8 - 数据管理 | AC-8.1~8.5 | §2.1.4 数据管理页、§2.4 彻底删除 | 加密导出、导入校验、彻底删除+二次确认 |
 | 需求 9 - 设置 | AC-9.1~9.4 | §2.1.2 我的页、§2.7 无障碍、§2.1.1 引导流 | 字号/通知/生物识别/呼吸开关、Dynamic Type、VoiceOver、44pt |
 | §6 合规 | AC-C.1~C.5 | §2.1.5 合规页、§2.2.2 TrainingMethod | 免责声明、隐私政策、来源标注、禁忌人群、审核名称 |
+| 需求 10 - 自定义计划 | AC-10.1~10.7 | §5.1 自定义训练计划、§2.2.2 UserPlanTemplate/PlanDraft | 选模板再改/空白自建/我的模板、Q3 一日多方法、updateProgress |
+| 需求 11 - 逐条编辑 | AC-11.1~11.8 | §5.2 逐条编辑、PlanRepository 契约 | 草稿态、单条/全量增删改、校验规则 |
+| 需求 12 - 直达陪练 | AC-12.1~12.6 | §5.3 直达陪练、CoachView(planItemId) | 动作行→详情、planItemId 透传、幂等勾选 |
+| 需求 13 - 方法专属模式与逐动作语音 | AC-13.1~13.10 | §5.5 训练陪练增强、§2.2.2 MethodMode/ModeActionStep | 方法专属模式目录、逐动作语音、per-method mode 持久化、AnalysisService 按 modeName 聚合 |
 
 ### 4.2 缺陷→设计约束追溯
 
@@ -527,7 +545,7 @@ func saveCurrentDraftAsTemplate(name: String)   // 以 dayDrafts 构造 UserPlan
 func deleteUserTemplate(_ id: UUID)
 func generatePlanFromDraft()                     // 校验 dayDrafts 非空且至少一天有方法
 
-// PlanRepository（复用，无需新增单条方法）
+// PlanRepository（复用；单条增删改方法见 §5.2 需求11 契约，v2.2 已补回，勿删）
 func saveUserTemplate(_ template: UserPlanTemplate)
 func fetchUserTemplates() -> [UserPlanTemplate]
 func deleteUserTemplate(_ id: UUID)
@@ -545,7 +563,7 @@ func deleteUserTemplate(_ id: UUID)
 ### 5.2 需求 11 — 当前计划逐条编辑（AC-11.1~11.7）
 
 > 必读：`requirements.md` §需求11、`PlanModels.swift`（`PlanItem`/`TrainingPlan`）、`PlanRepository.swift`、`PlanViewModel.swift`、`TrainingContentData.swift`
-> 决策状态：open-questions Q6 已确认 → **仅实现全量保存**（`updatePlanItems`），不提供单条粒度 Repository 方法。
+> 决策状态：open-questions Q6 **已修订（v2.2，以需求文档为准）** → 需求 11 明确要求「单条增删改能力」且 §10 追溯为 `PlanRepository` 单条增删改，故**提供单条粒度 Repository 方法**（`addPlanItem`/`updatePlanItem`/`removePlanItem`，既有实现保留，勿删）；全量 `updatePlanItems` 仍作批量路径保留。
 
 **AC 映射一览**
 
@@ -599,11 +617,15 @@ struct PlanEditDraft {
 
 **`PlanRepository` 接口契约（数据层）**
 
-主保存路径复用既有 `updatePlanItems(planId:items:)`（全量替换 items 并重算进度）。**Q6 已确认：v2.1 仅实现全量保存，不提供单条粒度方法**；编辑态的增/删/改均在内存 `PlanEditDraft.items` 上完成，保存时一次性整体落库。
+主保存路径复用既有 `updatePlanItems(planId:items:)`（全量替换 items 并重算进度）。**Q6 已修订（v2.2，以需求文档为准）**：需求 11 明确要求「单条增删改能力」且 §10 追溯为 `PlanRepository` 单条增删改，故同时**提供单条粒度方法**（既有实现保留，勿删）；编辑态的增/删/改可在内存 `PlanEditDraft.items` 完成并批量保存，亦可调用单条方法做增量落库。
 
 ```swift
 // 既有（直接复用，勿改）
 func updatePlanItems(planId: UUID, items: [PlanItem])      // 全量替换 + updateProgress
+// v2.2 新增（按需求 11 / §10 追溯，单条粒度，既有实现保留）
+func addPlanItem(_ item: PlanItem)                         // 插入单条并重算进度，默认 duration = method.defaultDuration
+func updatePlanItem(_ item: PlanItem)                      // 改指定字段后重算进度
+func removePlanItem(_ itemId: UUID)                        // 移除单条并重算进度
 ```
 
 - 写操作沿用 `dataController.performBackgroundTask` + 主上下文合并策略（呼应 AC-NF.8），与 `saveTrainingPlan` 既有一致。
@@ -844,10 +866,147 @@ func markItemCompleted(_ itemId: UUID)            // 已幂等（repository 置 
 | Q3（需求10 每日方法数） | 否决「每日 1 方法」→ 支持**同一天多方法**；数据模型改为按日分组 `PlanDraft.dayDrafts` / `UserPlanTemplate.days`；`buildCustomPlan` 对每个 `(日,方法)` 生成一条 `PlanItem` |
 | Q4（需求10 模板就地编辑） | v2.1 **不做**；「编辑模板」=「选我的模板再改」后另存为新模板（旧可删） |
 | Q5（需求10 模板描述） | `UserPlanTemplate` 含可选 `description: String?` |
-| Q6（需求11 单条粒度方法） | 仅全量保存 `updatePlanItems(planId:items:)`；**不提供** `upsertPlanItem`/`addPlanItem`/`removePlanItem` 单条方法 |
+| Q6（需求11 单条粒度方法） | **v2.2 修订（以需求文档为准）**：需求 11 要求「单条增删改能力」且 §10 追溯为 `PlanRepository` 单条增删改，故**提供** `addPlanItem`/`updatePlanItem`/`removePlanItem` 单条方法（既有实现保留，勿删）；全量 `updatePlanItems` 仍作批量路径保留（详见 §5.2 契约） |
+| Q7（需求13 mode 维度） | **草案待评审**：mode 为 **per-method**（非 per-day）；`DayDraft`/`UserPlanTemplateDay` 由扁平 `methodIds:[UUID]` 升级为 `methodSelections:[(methodId:UUID, modeId:UUID?)]`，保留 Q3「一日多方法」按日分组结构；`PlanItem`/`TrainingRecord` 加可空 `modeId`/`modeName`；保留遗留 `TrainingMode` 枚举兼容 |
+| Q8（需求13 逐动作语音） | **草案待评审**：陪练阶段由所选 `MethodMode.steps` 循环铺满 `defaultDuration` 生成；`tickTraining()` 在阶段切换时调 `VoiceGuideService.announceActionInstruction(_:)`，文案取自 `ModeActionStep.voiceInstruction`，替代通用"收缩/放松/休息"（AC-13.4 / AC-13.5）；遗留 `TrainingMode` 路径仍用 `announceContract/Relax/Rest` |
+| Q9（需求13 目录来源） | **草案待评审**：五方法模式目录（凯格尔/停-动/挤压/呼吸/骨盆底肌综合）与 `TrainingContentData` 各方法说明一致，语音文案仅作动作引导、不含医疗诊断（AC-13.10）；`MethodMode`/`ModeActionStep` 为 `TrainingContentData` 内置静态目录，纯内存、不落 Core Data |
 
 > 后续代码改动以 `open-questions.md` 结论及本 §5 为准；原计划草案已归档至 `docs/archive/plan-v2.1/`。
 
 ---
 
-*本设计文档为 v2.0 正式版＋v2.1 训练计划增强设计（需求 10/11/12），覆盖全部 9 项需求 + §6 合规要求 + v2.1 计划相关三项需求，可作为第二轮开发与代码审查的设计基线。*
+### 5.5 需求 13 — 方法专属训练模式与逐动作语音指导（AC-13.1~13.10，草案待评审）
+
+> 必读：`requirements.md` §需求13、`TrainingModels.swift`、`TrainingContentData.swift`、`CoachViewModel.swift`、`VoiceGuideService.swift`、`PlanModels.swift`/`PlanService.swift`/`PlanViewModel.swift`/`PlanBuilderView`、`AnalysisService`
+> 决策状态：**草案待评审**（需求 13 实现决策与 AC 均为草稿，落地前须经评审）；本设计为可评审的设计基线，含 Q7–Q9 决策记录（见 §5.4）。
+> 核心目标：①以数据驱动的方法专属模式目录（`MethodMode` / `ModeActionStep`）替代全局统一的 `TrainingMode`（基础/渐进/间歇）；②陪练阶段由所选 `MethodMode.steps` 循环生成，逐动作播报独立语音；③mode 为 **per-method**（非 per-day），随计划项/模板持久化并带入陪练。
+
+**AC 映射一览**
+
+| AC | 设计落点 |
+|----|----------|
+| AC-13.1 | `TrainingMethod.trainingModes:[MethodMode]`（五方法目录与需求 13 表一致，每模式 ≥2 步骤）|
+| AC-13.2 | 模式选择入口随方法动态刷新：`TrainingPreparationView` / `CoachView` / 自定义计划编辑器 / `PlanItemDetailView` 均按方法过滤可选模式 |
+| AC-13.3 | `ModeActionStep`：type（收缩/放松/休息/刺激/暂停，扩展 `TrainingActionPhase` 用于配色图标）、label、`voiceInstruction`、`durationSec`、可选 `breathInstruction` / `breathPhase` |
+| AC-13.4 | `CoachViewModel` 按 step 逐条播报 `VoiceGuideService.announceActionInstruction(_:)`，替代通用"收缩/放松/休息" |
+| AC-13.5 | 计时器 / 剩余时间 / 呼吸动画随 `step.type` + `step.breathPhase` 联动 |
+| AC-13.6 | 从「今日训练动作」(需求 12) 或自定义计划项进入陪练时，默认预选该计划项/模板所选模式（`initialMethodMode`）|
+| AC-13.7 | `PlanItem` / `UserPlanTemplateDay` / `DayDraft` 增 mode 字段（per-method）；`DayDraft.methodSelections:[(methodId, modeId?)]` 升级；`buildCustomPlan` / `draftFromTemplate` / `draftFromUserTemplate` 生成带 mode 的 `PlanItem` |
+| AC-13.8 | 模式选择 / 逐动作提示遵循 Dynamic Type / ≥44pt / VoiceOver |
+| AC-13.9 | `AnalysisService` 按 `modeName` 聚合（回退 `mode.rawValue`）|
+| AC-13.10 | 模式目录 / 语音文案基于 `TrainingContentData` 各方法说明，仅动作引导不含医疗诊断 |
+
+**数据模型（新增 / 扩展，与 §2.2.2 同步）**
+
+```swift
+/// 动作步骤类型（扩展 TrainingActionPhase：新增 stimulate / pause 等，用于配色与图标）
+enum TrainingActionPhase {
+    case contract, relax, rest
+    case stimulate, pause      // 需求 13 新增：刺激 / 临界暂停
+    // displayText / instruction 同步扩展
+}
+
+/// 单个动作步骤（数据驱动）
+struct ModeActionStep: Identifiable, Codable {
+    let id: UUID
+    let order: Int
+    let type: TrainingActionPhase   // 收缩/放松/休息/刺激/暂停
+    let label: String               // 显示标签，如"慢缩3秒"
+    let voiceInstruction: String    // 独立语音文案，如"收缩骨盆底肌，向上向内提起，保持三秒"
+    let durationSec: Int
+    var breathInstruction: String?  // 可选，如"深吸气4秒"
+    var breathPhase: BreathPhase?   // 可选联动呼吸引导
+}
+
+/// 方法专属模式
+struct MethodMode: Identifiable, Codable {
+    let id: UUID
+    let name: String                // 如"慢速收缩"
+    let difficulty: DifficultyLevel
+    let modeDescription: String     // 节奏要点
+    let steps: [ModeActionStep]
+}
+
+// TrainingMethod 扩展（不破坏既有）
+struct TrainingMethod { /* … 新增 let trainingModes: [MethodMode] … */ }
+
+// TrainingRecord 扩展（兼容遗留）
+struct TrainingRecord {
+    // … 既有字段 …
+    let mode: TrainingMode                 // 遗留枚举保留（被大量源码/测试引用）
+    let modeId: UUID? = nil              // 新增：方法专属模式 id
+    let modeName: String? = nil          // 新增：方法专属模式名（聚合键）
+}
+
+// PlanItem 扩展（AC-13.7）
+struct PlanItem {
+    // … 既有字段 …
+    var modeId: UUID? = nil              // 新增
+    var modeName: String? = nil          // 新增
+}
+```
+
+- `MethodMode` / `ModeActionStep` 为 `TrainingContentData` 内置**静态目录**（纯内存，不落 Core Data）；五方法目录与需求 13 正文表格、各方法 `description` 一致（AC-13.10）。
+- `TrainingRecord.mode` 遗留枚举保留；新增 `modeId` / `modeName` 可空，旧记录 `nil` 时由 `AnalysisService` 回退 `mode.rawValue`（AC-13.9）。
+
+**陪练阶段生成（替代既有 `generatePhaseSequence` 的 `TrainingMode` 分支，AC-13.4 / AC-13.5）**
+
+`CoachViewModel` 新增 `@Published var selectedMethodMode: MethodMode?`；`generatePhaseSequence()` 改为：若 `selectedMethodMode != nil`，将其 `steps` 按 `defaultDuration` 铺满循环生成 `phaseSequence`；否则回退既有 `TrainingMode` 三分支（兼容旧入口）。`PhaseConfig` 扩展承载逐动作信息：
+
+```swift
+struct PhaseConfig {
+    let type: TrainingActionPhase   // 来自 ModeActionStep.type
+    let duration: Int
+    let breathPhase: BreathPhase
+    let breathDuration: Int
+    let instruction: String         // 逐动作语音文案（ModeActionStep.voiceInstruction）
+    let label: String              // 显示标签（ModeActionStep.label）
+}
+```
+
+- 语音播报：`tickTraining()` 在 `phaseRemainingSeconds == 0` 时改调 `voiceGuideService.announceActionInstruction(currentPhase)`（文案取自 `PhaseConfig.instruction`）；不再用通用 `announceContract/Relax/Rest`（AC-13.4）。
+- 呼吸联动：呼吸动画随 `breathPhase` + `type` 切换（AC-13.5）。
+- 记录落库：`saveTrainingRecord()` 与部分记录均写入 `modeId` / `modeName`（空则填 `mode.rawValue`）。
+
+**模式选择入口（AC-13.2 / AC-13.6）**
+
+- `TrainingPreparationView` / `CoachView`：选定方法后，模式列表由 `method.trainingModes` 驱动；支持外部 `initialMethodMode` 预选（来自计划项/模板，AC-13.6）。
+- `PlanItemDetailView`（复用需求 12 入口）：进入陪练时把 `item.modeId` 解析为 `MethodMode` 并传入 `CoachView(initialMethodMode:)`（在既有 `initialMethod` 基础上扩展，AC-12.3 / AC-13.6）。
+- 自定义计划编辑器（AC-13.7）：`PlanBuilderView` 每方法选中后弹出方法专属模式选择（默认首个），写入 `DayDraft.methodSelections`。
+
+**计划模型升级（AC-13.7，per-method mode，保留 Q3 一日多方法）**
+
+```swift
+// DayDraft / UserPlanTemplateDay：扁平 methodIds → 按方法结构化
+struct DayDraft {
+    let id: UUID
+    var dayOffset: Int
+    var methodSelections: [(methodId: UUID, modeId: UUID?)]  // 取代 methodIds:[UUID]
+    var allMethodIds: [UUID] { /* 去重保序，供模板保存/展示 */ }
+}
+
+struct UserPlanTemplateDay {
+    let id: UUID
+    var dayOffset: Int
+    var methodSelections: [(methodId: UUID, modeId: UUID?)]
+}
+```
+
+- 计算属性 `methodIds` / `trainingDayOffsets` 保留（由 `methodSelections` 派生）；物理存储 `daysData`(Binary JSON) 升级为 `[UserPlanTemplateDay(methodSelections:)]`，`CDUserPlanTemplate` 编解码对应新结构。
+- `PlanService.buildCustomPlan` / `draftFromTemplate` / `draftFromUserTemplate`：为每个 `(day, methodSelection)` 生成一条 `PlanItem(methodId:methodName:duration:modeId:modeName:)`（`modeId` 取 `methodSelection.modeId`，`modeName` 取对应 `MethodMode.name`）。
+- `PlanViewModel`：透传 `methodSelections`；`PlanBuilderView` 模式选择状态进入草稿，保存模板 / 生成计划时落库。
+- **迁移提示**：`methodSelections` 为数据结构变更，`daysData`(Binary JSON) 在 v2.3 开发期处于新功能、无既有用户数据，沿用 Core Data 轻量迁移（结构升级由 JSON 解码兼容推断）。
+
+**分析聚合（AC-13.9）**
+
+`AnalysisService` 训练记录 / 频率聚合维度新增 `modeName`（`modeId` 解析后的 `modeName`，空则回退 `mode.rawValue`）；不破坏需求 6 五维加权模型与雷达图（§2.6.2）。
+
+**范围边界与兼容性（Q7–Q9）**
+
+- 保留遗留 `TrainingMode` 枚举（被大量源码 / 测试引用），新增 `modeId` / `modeName` 承载方法专属模式；`AnalysisService` 按 `modeName` 聚合并回退（需求 13 兼容策略）。
+- 不重写陪练计时 / 阶段引擎，仅在 `generatePhaseSequence` / `tickTraining` 语音分支切换；`MethodMode` / `ModeActionStep` 为纯内存静态目录，不新增 Core Data 实体（`TrainingRecord` / `PlanItem` 仅加可空字段）。
+- 不破坏需求 10（Q3 一日多方法）按日分组结构；`methodSelections` 升级仅细化每方法的模式，不推翻 `days` / `dayDrafts` 形态。
+
+---
+
+*本设计文档为 v2.0 正式版＋v2.1 训练计划增强设计（需求 10/11/12）＋v2.2 修订（Q6 反转）＋v2.3 训练陪练增强设计（需求 13，草案待评审），覆盖全部 13 项需求 + §6 合规要求 + §5 计划相关四项需求，可作为第二轮开发与代码审查的设计基线。*

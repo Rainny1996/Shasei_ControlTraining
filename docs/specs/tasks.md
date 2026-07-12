@@ -1,12 +1,13 @@
-# 实现任务（v2.0 修订版）
+# 实现任务（v2.2 修订版）
 
-> **文档状态**：v2.0（对齐需求 v2.0，补全需求 8/9、合规、无障碍、iCloud，并绑定 AC 编号）
-> **最后更新**：2026-07-11
+> **文档状态**：v2.2（对齐需求 v2.2，新增需求 13 方法专属模式与逐动作语音；含 v2.0 需求 8/9/合规/iCloud/陪练健壮性任务 13–17）
+> **最后更新**：2026-07-12
 > **图例**：`[x]` 已完成（首轮开发）｜`[ ]` 待办（本版新增/修订）｜每条任务列出覆盖的 `AC-x.y` 以便追溯
 
 ## 任务概览
 - 首轮已完成：12
-- 本版新增/修订：任务 13–17（新增）、既有任务补 AC 绑定与过度声明修正
+- 历史新增/修订：任务 13–17（需求 8/9/合规/iCloud/陪练健壮性，待办）
+- 本版新增：任务 18–23（需求 13 方法专属模式与逐动作语音）
 
 ---
 
@@ -87,6 +88,47 @@
   - 预录关键音效 + `AudioService` 统一音频会话配置（修复 BUG-CT-06）
   - 来电/抢占中断 → 计时暂停 + 手动恢复提示（AC-2.9）
   - 强制退出 → 部分训练记录 `isPartial=true`（AC-2.10，关联模型 `TrainingRecord.isPartial`）
+
+---
+
+## 新增任务（需求 13：方法专属模式与逐动作语音，待办）
+
+> 验收标准见 `requirements.md` 需求 13（AC-13.1~AC-13.10）与 `design-需求13` 设计规格。
+
+- [ ] 18. 数据模型：方法专属模式目录 — _AC: 13.1, 13.3, 13.10_
+  - `TrainingModels.swift` 新增 `MethodMode` / `ModeActionStep` 结构体（id/名称/难度/动作步骤数组）
+  - `TrainingMethod` 增加 `trainingModes: [MethodMode]` 字段
+  - `TrainingRecord` 增加 `modeId` / `modeName`（兼容保留遗留 `TrainingMode` 枚举）
+  - `TrainingActionPhase` 扩展分类（收缩/放松/暂停/呼吸/刺激等，用于配色与图标）
+  - `TrainingContentData` 为五方法填充专属模式与动作脚本，语音文案与既有方法说明一致
+
+- [ ] 19. 陪练核心：按 MethodMode 生成阶段序列 — _AC: 13.3, 13.4, 13.5_
+  - `CoachViewModel` 增加 `init(method:selectedMode:)`，缺省取 `method.trainingModes.first`
+  - `generatePhaseSequence()` 用所选 `MethodMode.steps` 循环铺满 `defaultDuration`
+  - 计时/进度展示改用步骤 `label`；`announcePhaseTransition()` 播报逐动作语音（替代旧 `announceContract/Relax/Rest` 切换逻辑）
+
+- [ ] 20. 陪练 UI：模式选择改为方法专属并带入 initialMode — _AC: 13.2, 13.6, 13.8_
+  - `CoachView`：`selectedMode: TrainingMode` → `selectedMethodMode: MethodMode?`；模式卡片遍历 `method.trainingModes`；完成统计显示模式名；`startTraining()` 传所选模式
+  - `TrainingPreparationView`（TrainingDetailView.swift）：模式选择适配 `MethodMode`，补传 `initialMode` 给 `CoachView`
+  - `PlanItemDetailView`：由 `item.modeId` 解析 `initialMode` 预选
+  - `TrainingTimerView`：动作配色按扩展后的 `TrainingActionPhase` 映射
+  - 满足 Dynamic Type / 44pt / VoiceOver
+
+- [ ] 21. 语音服务：逐动作语音 — _AC: 13.4_
+  - `VoiceGuideService` 新增 `announceActionInstruction(_ step: ModeActionStep)`，播报 `voiceInstruction` + 可选 `breathInstruction`
+  - 保留 `announceActionPhase` 兼容方法；`AudioService` 保留 `announceContract/Relax/Rest` 兼容
+
+- [ ] 22. 计划联动：所选模式持久化与聚合 — _AC: 13.6, 13.7, 13.9_
+  - `PlanItem` 增加 `modeId` / `modeName`；`DayDraft` / `UserPlanTemplateDay` 由扁平 `methodIds:[UUID]` **升级为** `methodSelections:[(methodId:UUID, modeId:UUID?)]`（per-method 模式，保留「一日多方法」Q3，**同步改造 需求 10 数据模型**，不推翻其按日分组结构）
+  - `PlanService.buildCustomPlan` / `generatePlanFromTemplate` / `draftFromTemplate` / `draftFromUserTemplate` 由 `methodSelections` 生成带 mode 的 `PlanItem`（透传模式）
+  - `PlanBuilderView`：每方法选中后提供该方法模式选择（默认首个），写入 `modeIds`
+  - `PlanViewModel.commitCustomPlan` / `saveCurrentDraftAsTemplate` 透传所选模式
+  - `AnalysisService`：聚合维度由 `mode` 改为 `modeName`（空则回退 `mode.rawValue`）
+
+- [ ] 23. 测试与回归验证 — _AC: 13.1, 13.4, 13.9_
+  - 用 code-explorer 全量定位 `TrainingMode` / `TrainingRecord(mode:)` / `selectedMode` / `CoachView` 初始化透传点，确保无遗漏改动
+  - 校验 `TrainingMode` 枚举保留后既有 `ModelTests.testTrainingModeEnum` 不受影响；`TrainingRecord(mode:)` 新增参数为可选，确保全量测试编译通过
+  - 新增单元测试：模式目录完整性（每方法≥2模式、每模式≥2步骤）、逐动作语音文案非空、计划项模式落库与陪练预选闭环
 
 ---
 

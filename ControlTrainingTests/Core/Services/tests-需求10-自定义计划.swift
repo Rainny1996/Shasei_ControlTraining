@@ -67,12 +67,12 @@ final class Tests需求10自定义计划: XCTestCase {
         // 空白起点后自行挑选方法与日期
         let method = firstMethod()
         let draft = PlanDraft(
+            goal: .control,
+            difficulty: .beginner,
             dayDrafts: [
                 DayDraft(dayOffset: 0, methodIds: [method.id]),
                 DayDraft(dayOffset: 3, methodIds: [method.id, firstMethod2().id])
-            ],
-            goal: .control,
-            difficulty: .beginner
+            ]
         )
         let plan = service.buildCustomPlan(dayDrafts: draft.dayDrafts, goal: .control)
         XCTAssertEqual(plan.items.count, 3, "空白自建补填：0 日 1 法 + 3 日 2 法 = 3 项")
@@ -165,9 +165,9 @@ final class Tests需求10自定义计划: XCTestCase {
         // 设置自定义草稿（含 1 日 1 法）
         let method = firstMethod()
         vm.customPlanDraft = PlanDraft(
-            dayDrafts: [DayDraft(dayOffset: 1, methodIds: [method.id])],
             goal: .endurance,
-            difficulty: .beginner
+            difficulty: .beginner,
+            dayDrafts: [DayDraft(dayOffset: 1, methodIds: [method.id])]
         )
 
         // 生成（覆盖写）
@@ -224,8 +224,8 @@ final class PlanBuilderIntegrationTests: XCTestCase {
 
         let method = TrainingContentData.allTrainingMethods().first!
         vm.customPlanDraft = PlanDraft(
-            dayDrafts: [DayDraft(dayOffset: 0, methodIds: [method.id])],
-            goal: .endurance, difficulty: .beginner
+            goal: .endurance, difficulty: .beginner,
+            dayDrafts: [DayDraft(dayOffset: 0, methodIds: [method.id])]
         )
 
         // 渲染真实视图（强制 body 求值），不应崩溃
