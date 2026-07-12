@@ -53,16 +53,16 @@ jobs:
             -configuration Release \
             -sdk iphoneos \
             -arch arm64 \
-            -derivedDataPath build \
-            BUILD_DIR="$PWD/build-output" \
             CODE_SIGNING_ALLOWED=NO \
             CODE_SIGNING_REQUIRED=NO \
             CODE_SIGN_IDENTITY="" \
             DEVELOPMENT_TEAM="" \
+            AD_HOC_CODE_SIGNING_ALLOWED=YES \
             ENABLE_BITCODE=NO \
-            > build.log 2>&1 || {
-              echo "========== BUILD FAILED (exit $?) =========="
-              cat build.log
+            | tee build.log || {
+              echo "========== BUILD FAILED (exit ${PIPESTATUS[0]}) =========="
+              echo "::error::BUILD FAILED - 见下方错误"
+              grep -E "error:|fatal:|** BUILD" build.log | head -40 | while read -r line; do echo "::error::$line"; done
               exit 1
             }
           echo "========== BUILD SUCCEEDED =========="
@@ -71,23 +71,19 @@ jobs:
       - name: Debug - List build products
         if: always()
         run: |
-          echo "=== .app files in build-output ==="
-          find build-output -name "*.app" 2>/dev/null || echo "none"
-          echo "=== .app files in build ==="
-          find build -name "*.app" 2>/dev/null || echo "none"
+          echo "=== .app files in default DerivedData ==="
+          find ~/Library/Developer/Xcode/DerivedData -name "毅练.app" 2>/dev/null || echo "none"
+          echo "=== build.log error lines ==="
+          grep -E "error:|fatal:" build.log 2>/dev/null | head -40 || echo "none"
 
       - name: Create IPA
         run: |
-          APP_PATH=$(find build-output -name "毅练.app" | head -1)
-          if [ -z "$APP_PATH" ]; then
-            APP_PATH=$(find build -name "毅练.app" | head -1)
-          fi
+          APP_PATH=$(find ~/Library/Developer/Xcode/DerivedData -name "毅练.app" | head -1)
           if [ -z "$APP_PATH" ]; then
             echo "ERROR: Could not find 毅练.app"
-            echo "=== grep errors ==="
-            grep -E "error:|fatal:" build.log | head -50 || echo "none"
-            echo "=== tail build.log ==="
-            tail -150 build.log
+            echo "::error::Could not find 毅练.app"
+            grep -E "error:|fatal:" build.log 2>/dev/null | head -40 | while read -r line; do echo "::error::$line"; done
+            tail -150 build.log 2>/dev/null
             exit 1
           fi
           echo "Found app at: $APP_PATH"
