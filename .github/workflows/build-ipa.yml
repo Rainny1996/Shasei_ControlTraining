@@ -90,7 +90,7 @@ jobs:
           set -o pipefail
           xcodebuild build \
             -project "${{ steps.locate.outputs.PROJECT_FILE }}" \
-            -target "毅练" \
+            -scheme "毅练" \
             -configuration Release \
             -sdk iphoneos \
             -arch arm64 \
