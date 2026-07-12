@@ -7,75 +7,75 @@
 	objects = {
 
 /* Begin PBXBuildFile section */
-		YY0001 /* YiLianApp.swift in Sources */ = {isa = PBXBuildFile; fileRef = YY1001 /* YiLianApp.swift */; };
-		YY0002 /* TrainingState.swift in Sources */ = {isa = PBXBuildFile; fileRef = YY1002 /* TrainingState.swift */; };
-		YY0003 /* TrainingConfig.swift in Sources */ = {isa = PBXBuildFile; fileRef = YY1003 /* TrainingConfig.swift */; };
-		YY0004 /* TrainingSession.swift in Sources */ = {isa = PBXBuildFile; fileRef = YY1004 /* TrainingSession.swift */; };
-		YY0005 /* TrainingStateMachine.swift in Sources */ = {isa = PBXBuildFile; fileRef = YY1005 /* TrainingStateMachine.swift */; };
-		YY0006 /* VoiceService.swift in Sources */ = {isa = PBXBuildFile; fileRef = YY1006 /* VoiceService.swift */; };
-		YY0007 /* TimerScheduler.swift in Sources */ = {isa = PBXBuildFile; fileRef = YY1007 /* TimerScheduler.swift */; };
-		YY0008 /* CoreDataStack.swift in Sources */ = {isa = PBXBuildFile; fileRef = YY1008 /* CoreDataStack.swift */; };
-		YY0009 /* LocalAuthManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = YY1009 /* LocalAuthManager.swift */; };
-		YY0010 /* HapticManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = YY1010 /* HapticManager.swift */; };
-		YY0011 /* TrainingViewModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = YY1011 /* TrainingViewModel.swift */; };
-		YY0012 /* RecordsViewModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = YY1012 /* RecordsViewModel.swift */; };
-		YY0013 /* SettingsViewModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = YY1013 /* SettingsViewModel.swift */; };
-		YY0014 /* PrepareView.swift in Sources */ = {isa = PBXBuildFile; fileRef = YY1014 /* PrepareView.swift */; };
-		YY0015 /* ArousalView.swift in Sources */ = {isa = PBXBuildFile; fileRef = YY1015 /* ArousalView.swift */; };
-		YY0016 /* LowArousalView.swift in Sources */ = {isa = PBXBuildFile; fileRef = YY1016 /* LowArousalView.swift */; };
-		YY0017 /* ControlZoneView.swift in Sources */ = {isa = PBXBuildFile; fileRef = YY1017 /* ControlZoneView.swift */; };
-		YY0018 /* StopWaitingView.swift in Sources */ = {isa = PBXBuildFile; fileRef = YY1018 /* StopWaitingView.swift */; };
-		YY0019 /* SqueezeView.swift in Sources */ = {isa = PBXBuildFile; fileRef = YY1019 /* SqueezeView.swift */; };
-		YY0020 /* FinishedView.swift in Sources */ = {isa = PBXBuildFile; fileRef = YY1020 /* FinishedView.swift */; };
-		YY0021 /* LockView.swift in Sources */ = {isa = PBXBuildFile; fileRef = YY1021 /* LockView.swift */; };
-		YY0022 /* RecordsView.swift in Sources */ = {isa = PBXBuildFile; fileRef = YY1022 /* RecordsView.swift */; };
-		YY0023 /* SettingsView.swift in Sources */ = {isa = PBXBuildFile; fileRef = YY1023 /* SettingsView.swift */; };
-		YY0024 /* BreathingCircle.swift in Sources */ = {isa = PBXBuildFile; fileRef = YY1024 /* BreathingCircle.swift */; };
-		YY0025 /* ContentView.swift in Sources */ = {isa = PBXBuildFile; fileRef = YY1025 /* ContentView.swift */; };
-		YY0026 /* Color+Theme.swift in Sources */ = {isa = PBXBuildFile; fileRef = YY1026 /* Color+Theme.swift */; };
-		YY0027 /* VoiceScripts.swift in Sources */ = {isa = PBXBuildFile; fileRef = YY1027 /* VoiceScripts.swift */; };
-		YY0028 /* TrainingContainerView.swift in Sources */ = {isa = PBXBuildFile; fileRef = YY1028 /* TrainingContainerView.swift */; };
-		YY0029 /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = YY1029 /* Assets.xcassets */; };
-		YY0030 /* YiLianModel.xcdatamodeld in Sources */ = {isa = PBXBuildFile; fileRef = YY1030 /* YiLianModel.xcdatamodeld */; };
+		AA0000000000000000000001 /* YiLianApp.swift in Sources */ = {isa = PBXBuildFile; fileRef = BB0000000000000000000001 /* YiLianApp.swift */; };
+		AA0000000000000000000002 /* TrainingState.swift in Sources */ = {isa = PBXBuildFile; fileRef = BB0000000000000000000002 /* TrainingState.swift */; };
+		AA0000000000000000000003 /* TrainingConfig.swift in Sources */ = {isa = PBXBuildFile; fileRef = BB0000000000000000000003 /* TrainingConfig.swift */; };
+		AA0000000000000000000004 /* TrainingSession.swift in Sources */ = {isa = PBXBuildFile; fileRef = BB0000000000000000000004 /* TrainingSession.swift */; };
+		AA0000000000000000000005 /* TrainingStateMachine.swift in Sources */ = {isa = PBXBuildFile; fileRef = BB0000000000000000000005 /* TrainingStateMachine.swift */; };
+		AA0000000000000000000006 /* VoiceService.swift in Sources */ = {isa = PBXBuildFile; fileRef = BB0000000000000000000006 /* VoiceService.swift */; };
+		AA0000000000000000000007 /* TimerScheduler.swift in Sources */ = {isa = PBXBuildFile; fileRef = BB0000000000000000000007 /* TimerScheduler.swift */; };
+		AA0000000000000000000008 /* CoreDataStack.swift in Sources */ = {isa = PBXBuildFile; fileRef = BB0000000000000000000008 /* CoreDataStack.swift */; };
+		AA0000000000000000000009 /* LocalAuthManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = BB0000000000000000000009 /* LocalAuthManager.swift */; };
+		AA0000000000000000000010 /* HapticManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = BB0000000000000000000010 /* HapticManager.swift */; };
+		AA0000000000000000000011 /* TrainingViewModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = BB0000000000000000000011 /* TrainingViewModel.swift */; };
+		AA0000000000000000000012 /* RecordsViewModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = BB0000000000000000000012 /* RecordsViewModel.swift */; };
+		AA0000000000000000000013 /* SettingsViewModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = BB0000000000000000000013 /* SettingsViewModel.swift */; };
+		AA0000000000000000000014 /* PrepareView.swift in Sources */ = {isa = PBXBuildFile; fileRef = BB0000000000000000000014 /* PrepareView.swift */; };
+		AA0000000000000000000015 /* ArousalView.swift in Sources */ = {isa = PBXBuildFile; fileRef = BB0000000000000000000015 /* ArousalView.swift */; };
+		AA0000000000000000000016 /* LowArousalView.swift in Sources */ = {isa = PBXBuildFile; fileRef = BB0000000000000000000016 /* LowArousalView.swift */; };
+		AA0000000000000000000017 /* ControlZoneView.swift in Sources */ = {isa = PBXBuildFile; fileRef = BB0000000000000000000017 /* ControlZoneView.swift */; };
+		AA0000000000000000000018 /* StopWaitingView.swift in Sources */ = {isa = PBXBuildFile; fileRef = BB0000000000000000000018 /* StopWaitingView.swift */; };
+		AA0000000000000000000019 /* SqueezeView.swift in Sources */ = {isa = PBXBuildFile; fileRef = BB0000000000000000000019 /* SqueezeView.swift */; };
+		AA0000000000000000000020 /* FinishedView.swift in Sources */ = {isa = PBXBuildFile; fileRef = BB0000000000000000000020 /* FinishedView.swift */; };
+		AA0000000000000000000021 /* LockView.swift in Sources */ = {isa = PBXBuildFile; fileRef = BB0000000000000000000021 /* LockView.swift */; };
+		AA0000000000000000000022 /* RecordsView.swift in Sources */ = {isa = PBXBuildFile; fileRef = BB0000000000000000000022 /* RecordsView.swift */; };
+		AA0000000000000000000023 /* SettingsView.swift in Sources */ = {isa = PBXBuildFile; fileRef = BB0000000000000000000023 /* SettingsView.swift */; };
+		AA0000000000000000000024 /* BreathingCircle.swift in Sources */ = {isa = PBXBuildFile; fileRef = BB0000000000000000000024 /* BreathingCircle.swift */; };
+		AA0000000000000000000025 /* ContentView.swift in Sources */ = {isa = PBXBuildFile; fileRef = BB0000000000000000000025 /* ContentView.swift */; };
+		AA0000000000000000000026 /* Color+Theme.swift in Sources */ = {isa = PBXBuildFile; fileRef = BB0000000000000000000026 /* Color+Theme.swift */; };
+		AA0000000000000000000027 /* VoiceScripts.swift in Sources */ = {isa = PBXBuildFile; fileRef = BB0000000000000000000027 /* VoiceScripts.swift */; };
+		AA0000000000000000000028 /* TrainingContainerView.swift in Sources */ = {isa = PBXBuildFile; fileRef = BB0000000000000000000028 /* TrainingContainerView.swift */; };
+		AA0000000000000000000029 /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = BB0000000000000000000029 /* Assets.xcassets */; };
+		AA0000000000000000000030 /* Model.xcdatamodeld in Sources */ = {isa = PBXBuildFile; fileRef = BB0000000000000000000030 /* Model.xcdatamodeld */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXFileReference section */
-		YY1001 /* YiLianApp.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = YiLianApp.swift; sourceTree = "<group>"; };
-		YY1002 /* TrainingState.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TrainingState.swift; sourceTree = "<group>"; };
-		YY1003 /* TrainingConfig.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TrainingConfig.swift; sourceTree = "<group>"; };
-		YY1004 /* TrainingSession.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TrainingSession.swift; sourceTree = "<group>"; };
-		YY1005 /* TrainingStateMachine.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TrainingStateMachine.swift; sourceTree = "<group>"; };
-		YY1006 /* VoiceService.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = VoiceService.swift; sourceTree = "<group>"; };
-		YY1007 /* TimerScheduler.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TimerScheduler.swift; sourceTree = "<group>"; };
-		YY1008 /* CoreDataStack.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CoreDataStack.swift; sourceTree = "<group>"; };
-		YY1009 /* LocalAuthManager.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LocalAuthManager.swift; sourceTree = "<group>"; };
-		YY1010 /* HapticManager.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = HapticManager.swift; sourceTree = "<group>"; };
-		YY1011 /* TrainingViewModel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TrainingViewModel.swift; sourceTree = "<group>"; };
-		YY1012 /* RecordsViewModel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = RecordsViewModel.swift; sourceTree = "<group>"; };
-		YY1013 /* SettingsViewModel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SettingsViewModel.swift; sourceTree = "<group>"; };
-		YY1014 /* PrepareView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PrepareView.swift; sourceTree = "<group>"; };
-		YY1015 /* ArousalView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ArousalView.swift; sourceTree = "<group>"; };
-		YY1016 /* LowArousalView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LowArousalView.swift; sourceTree = "<group>"; };
-		YY1017 /* ControlZoneView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ControlZoneView.swift; sourceTree = "<group>"; };
-		YY1018 /* StopWaitingView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = StopWaitingView.swift; sourceTree = "<group>"; };
-		YY1019 /* SqueezeView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SqueezeView.swift; sourceTree = "<group>"; };
-		YY1020 /* FinishedView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = FinishedView.swift; sourceTree = "<group>"; };
-		YY1021 /* LockView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LockView.swift; sourceTree = "<group>"; };
-		YY1022 /* RecordsView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = RecordsView.swift; sourceTree = "<group>"; };
-		YY1023 /* SettingsView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SettingsView.swift; sourceTree = "<group>"; };
-		YY1024 /* BreathingCircle.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = BreathingCircle.swift; sourceTree = "<group>"; };
-		YY1025 /* ContentView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ContentView.swift; sourceTree = "<group>"; };
-		YY1026 /* Color+Theme.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "Color+Theme.swift"; sourceTree = "<group>"; };
-		YY1027 /* VoiceScripts.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = VoiceScripts.swift; sourceTree = "<group>"; };
-		YY1028 /* TrainingContainerView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TrainingContainerView.swift; sourceTree = "<group>"; };
-		YY1029 /* Assets.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; path = Assets.xcassets; sourceTree = "<group>"; };
-		YY1030 /* YiLianModel.xcdatamodeld */ = {isa = PBXFileReference; lastKnownFileType = wrapper.xcdatamodeld; path = YiLianModel.xcdatamodeld; sourceTree = "<group>"; };
-		YY1031 /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
-		YY2001 /* 毅练.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = "毅练.app"; sourceTree = BUILT_PRODUCTS_DIR; };
+		BB0000000000000000000001 /* YiLianApp.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = YiLianApp.swift; sourceTree = "<group>"; };
+		BB0000000000000000000002 /* TrainingState.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TrainingState.swift; sourceTree = "<group>"; };
+		BB0000000000000000000003 /* TrainingConfig.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TrainingConfig.swift; sourceTree = "<group>"; };
+		BB0000000000000000000004 /* TrainingSession.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TrainingSession.swift; sourceTree = "<group>"; };
+		BB0000000000000000000005 /* TrainingStateMachine.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TrainingStateMachine.swift; sourceTree = "<group>"; };
+		BB0000000000000000000006 /* VoiceService.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = VoiceService.swift; sourceTree = "<group>"; };
+		BB0000000000000000000007 /* TimerScheduler.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TimerScheduler.swift; sourceTree = "<group>"; };
+		BB0000000000000000000008 /* CoreDataStack.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CoreDataStack.swift; sourceTree = "<group>"; };
+		BB0000000000000000000009 /* LocalAuthManager.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LocalAuthManager.swift; sourceTree = "<group>"; };
+		BB0000000000000000000010 /* HapticManager.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = HapticManager.swift; sourceTree = "<group>"; };
+		BB0000000000000000000011 /* TrainingViewModel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TrainingViewModel.swift; sourceTree = "<group>"; };
+		BB0000000000000000000012 /* RecordsViewModel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = RecordsViewModel.swift; sourceTree = "<group>"; };
+		BB0000000000000000000013 /* SettingsViewModel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SettingsViewModel.swift; sourceTree = "<group>"; };
+		BB0000000000000000000014 /* PrepareView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PrepareView.swift; sourceTree = "<group>"; };
+		BB0000000000000000000015 /* ArousalView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ArousalView.swift; sourceTree = "<group>"; };
+		BB0000000000000000000016 /* LowArousalView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LowArousalView.swift; sourceTree = "<group>"; };
+		BB0000000000000000000017 /* ControlZoneView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ControlZoneView.swift; sourceTree = "<group>"; };
+		BB0000000000000000000018 /* StopWaitingView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = StopWaitingView.swift; sourceTree = "<group>"; };
+		BB0000000000000000000019 /* SqueezeView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SqueezeView.swift; sourceTree = "<group>"; };
+		BB0000000000000000000020 /* FinishedView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = FinishedView.swift; sourceTree = "<group>"; };
+		BB0000000000000000000021 /* LockView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LockView.swift; sourceTree = "<group>"; };
+		BB0000000000000000000022 /* RecordsView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = RecordsView.swift; sourceTree = "<group>"; };
+		BB0000000000000000000023 /* SettingsView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SettingsView.swift; sourceTree = "<group>"; };
+		BB0000000000000000000024 /* BreathingCircle.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = BreathingCircle.swift; sourceTree = "<group>"; };
+		BB0000000000000000000025 /* ContentView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ContentView.swift; sourceTree = "<group>"; };
+		BB0000000000000000000026 /* Color+Theme.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "Color+Theme.swift"; sourceTree = "<group>"; };
+		BB0000000000000000000027 /* VoiceScripts.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = VoiceScripts.swift; sourceTree = "<group>"; };
+		BB0000000000000000000028 /* TrainingContainerView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TrainingContainerView.swift; sourceTree = "<group>"; };
+		BB0000000000000000000029 /* Assets.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; path = Assets.xcassets; sourceTree = "<group>"; };
+		BB0000000000000000000030 /* Model.xcdatamodeld */ = {isa = PBXFileReference; lastKnownFileType = wrapper.xcdatamodeld; path = Model.xcdatamodeld; sourceTree = "<group>"; };
+		BB0000000000000000000031 /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
+		BB0000000000000000000032 /* 毅练.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = "毅练.app"; sourceTree = BUILT_PRODUCTS_DIR; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
-		YY3001 /* Frameworks */ = {
+		CC0000000000000000000001 /* Frameworks */ = {
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
@@ -85,152 +85,152 @@
 /* End PBXFrameworksBuildPhase section */
 
 /* Begin PBXGroup section */
-		YY4001 = {
+		DD0000000000000000000001 = {
 			isa = PBXGroup;
 			children = (
-				YY4002 /* 毅练 */,
-				YY2001 /* 毅练.app */,
+				DD0000000000000000000002 /* 毅练 */,
+				DD0000000000000000000003 /* Products */,
 			);
 			sourceTree = "<group>";
 		};
-		YY4002 /* 毅练 */ = {
+		DD0000000000000000000003 /* Products */ = {
 			isa = PBXGroup;
 			children = (
-				YY4101 /* App */,
-				YY4102 /* Models */,
-				YY4103 /* StateMachine */,
-				YY4104 /* Services */,
-				YY4105 /* ViewModels */,
-				YY4106 /* Views */,
-				YY4107 /* Resources */,
-				YY4108 /* Model */,
-				YY1031 /* Info.plist */,
+				BB0000000000000000000032 /* 毅练.app */,
 			);
-			path = 毅练;
+			name = Products;
 			sourceTree = "<group>";
 		};
-		YY4101 /* App */ = {
+		DD0000000000000000000002 /* 毅练 */ = {
 			isa = PBXGroup;
 			children = (
-				YY1001 /* YiLianApp.swift */,
+				DD0000000000000000000101 /* App */,
+				DD0000000000000000000102 /* Models */,
+				DD0000000000000000000103 /* StateMachine */,
+				DD0000000000000000000104 /* Services */,
+				DD0000000000000000000105 /* ViewModels */,
+				DD0000000000000000000106 /* Views */,
+				DD0000000000000000000107 /* Resources */,
+				BB0000000000000000000030 /* Model.xcdatamodeld */,
+				BB0000000000000000000031 /* Info.plist */,
+			);
+			path = "毅练";
+			sourceTree = "<group>";
+		};
+		DD0000000000000000000101 /* App */ = {
+			isa = PBXGroup;
+			children = (
+				BB0000000000000000000001 /* YiLianApp.swift */,
 			);
 			path = App;
 			sourceTree = "<group>";
 		};
-		YY4102 /* Models */ = {
+		DD0000000000000000000102 /* Models */ = {
 			isa = PBXGroup;
 			children = (
-				YY1002 /* TrainingState.swift */,
-				YY1003 /* TrainingConfig.swift */,
-				YY1004 /* TrainingSession.swift */,
+				BB0000000000000000000002 /* TrainingState.swift */,
+				BB0000000000000000000003 /* TrainingConfig.swift */,
+				BB0000000000000000000004 /* TrainingSession.swift */,
 			);
 			path = Models;
 			sourceTree = "<group>";
 		};
-		YY4103 /* StateMachine */ = {
+		DD0000000000000000000103 /* StateMachine */ = {
 			isa = PBXGroup;
 			children = (
-				YY1005 /* TrainingStateMachine.swift */,
+				BB0000000000000000000005 /* TrainingStateMachine.swift */,
 			);
 			path = StateMachine;
 			sourceTree = "<group>";
 		};
-		YY4104 /* Services */ = {
+		DD0000000000000000000104 /* Services */ = {
 			isa = PBXGroup;
 			children = (
-				YY1006 /* VoiceService.swift */,
-				YY1007 /* TimerScheduler.swift */,
-				YY1008 /* CoreDataStack.swift */,
-				YY1009 /* LocalAuthManager.swift */,
-				YY1010 /* HapticManager.swift */,
+				BB0000000000000000000006 /* VoiceService.swift */,
+				BB0000000000000000000007 /* TimerScheduler.swift */,
+				BB0000000000000000000008 /* CoreDataStack.swift */,
+				BB0000000000000000000009 /* LocalAuthManager.swift */,
+				BB0000000000000000000010 /* HapticManager.swift */,
 			);
 			path = Services;
 			sourceTree = "<group>";
 		};
-		YY4105 /* ViewModels */ = {
+		DD0000000000000000000105 /* ViewModels */ = {
 			isa = PBXGroup;
 			children = (
-				YY1011 /* TrainingViewModel.swift */,
-				YY1012 /* RecordsViewModel.swift */,
-				YY1013 /* SettingsViewModel.swift */,
+				BB0000000000000000000011 /* TrainingViewModel.swift */,
+				BB0000000000000000000012 /* RecordsViewModel.swift */,
+				BB0000000000000000000013 /* SettingsViewModel.swift */,
 			);
 			path = ViewModels;
 			sourceTree = "<group>";
 		};
-		YY4106 /* Views */ = {
+		DD0000000000000000000106 /* Views */ = {
 			isa = PBXGroup;
 			children = (
-				YY1014 /* PrepareView.swift */,
-				YY1015 /* ArousalView.swift */,
-				YY1016 /* LowArousalView.swift */,
-				YY1017 /* ControlZoneView.swift */,
-				YY1018 /* StopWaitingView.swift */,
-				YY1019 /* SqueezeView.swift */,
-				YY1020 /* FinishedView.swift */,
-				YY1021 /* LockView.swift */,
-				YY1022 /* RecordsView.swift */,
-				YY1023 /* SettingsView.swift */,
-				YY1024 /* BreathingCircle.swift */,
-				YY1025 /* ContentView.swift */,
-				YY1026 /* Color+Theme.swift */,
-				YY1028 /* TrainingContainerView.swift */,
+				BB0000000000000000000014 /* PrepareView.swift */,
+				BB0000000000000000000015 /* ArousalView.swift */,
+				BB0000000000000000000016 /* LowArousalView.swift */,
+				BB0000000000000000000017 /* ControlZoneView.swift */,
+				BB0000000000000000000018 /* StopWaitingView.swift */,
+				BB0000000000000000000019 /* SqueezeView.swift */,
+				BB0000000000000000000020 /* FinishedView.swift */,
+				BB0000000000000000000021 /* LockView.swift */,
+				BB0000000000000000000022 /* RecordsView.swift */,
+				BB0000000000000000000023 /* SettingsView.swift */,
+				BB0000000000000000000024 /* BreathingCircle.swift */,
+				BB0000000000000000000025 /* ContentView.swift */,
+				BB0000000000000000000026 /* Color+Theme.swift */,
+				BB0000000000000000000028 /* TrainingContainerView.swift */,
 			);
 			path = Views;
 			sourceTree = "<group>";
 		};
-		YY4107 /* Resources */ = {
+		DD0000000000000000000107 /* Resources */ = {
 			isa = PBXGroup;
 			children = (
-				YY1029 /* Assets.xcassets */,
-				YY1027 /* VoiceScripts.swift */,
+				BB0000000000000000000029 /* Assets.xcassets */,
+				BB0000000000000000000027 /* VoiceScripts.swift */,
 			);
 			path = Resources;
-			sourceTree = "<group>";
-		};
-		YY4108 /* Model */ = {
-			isa = PBXGroup;
-			children = (
-				YY1030 /* YiLianModel.xcdatamodeld */,
-			);
-			path = Model;
 			sourceTree = "<group>";
 		};
 /* End PBXGroup section */
 
 /* Begin PBXNativeTarget section */
-		YY5001 /* 毅练 */ = {
+		EE0000000000000000000001 /* 毅练 */ = {
 			isa = PBXNativeTarget;
-			buildConfigurationList = YY6002 /* Build configuration list for PBXNativeTarget "毅练" */;
+			buildConfigurationList = FF0000000000000000000002 /* Build configuration list for PBXNativeTarget "毅练" */;
 			buildPhases = (
-				YY5002 /* Sources */,
-				YY3001 /* Frameworks */,
-				YY5003 /* Resources */,
+				GG0000000000000000000001 /* Sources */,
+				CC0000000000000000000001 /* Frameworks */,
+				GG0000000000000000000002 /* Resources */,
 			);
 			buildRules = (
 			);
 			dependencies = (
 			);
-			name = 毅练;
-			productName = 毅练;
-			productReference = YY2001 /* 毅练.app */;
+			name = "毅练";
+			productName = "毅练";
+			productReference = BB0000000000000000000032 /* 毅练.app */;
 			productType = "com.apple.product-type.application";
 		};
 /* End PBXNativeTarget section */
 
 /* Begin PBXProject section */
-		YY6001 /* Project object */ = {
+		HH0000000000000000000001 /* Project object */ = {
 			isa = PBXProject;
 			attributes = {
 				BuildIndependentTargetsInParallel = 1;
 				LastSwiftUpdateCheck = 1500;
 				LastUpgradeCheck = 1500;
 				TargetAttributes = {
-					YY5001 = {
+					EE0000000000000000000001 = {
 						CreatedOnToolsVersion = 15.0;
 					};
 				};
 			};
-			buildConfigurationList = YY6003 /* Build configuration list for PBXProject "毅练" */;
+			buildConfigurationList = FF0000000000000000000003 /* Build configuration list for PBXProject "毅练" */;
 			compatibilityVersion = "Xcode 14.0";
 			developmentRegion = en;
 			hasScannedForEncodings = 0;
@@ -239,43 +239,68 @@
 				Base,
 				"zh-Hans",
 			);
-			mainGroup = YY4001;
-			productRefGroup = YY4001;
+			mainGroup = DD0000000000000000000001;
+			productRefGroup = DD0000000000000000000003 /* Products */;
 			projectDirPath = "";
 			projectRoot = "";
 			targets = (
-				YY5001 /* 毅练 */,
+				EE0000000000000000000001 /* 毅练 */,
 			);
 		};
 /* End PBXProject section */
 
 /* Begin PBXResourcesBuildPhase section */
-		YY5003 /* Resources */ = {
+		GG0000000000000000000002 /* Resources */ = {
 			isa = PBXResourcesBuildPhase;
 			buildActionMask = 2147483647;
-		files = (
-			YY0029 /* Assets.xcassets in Resources */,
-		);
-		runOnlyForDeploymentPostprocessing = 0;
-	};
+			files = (
+				AA0000000000000000000029 /* Assets.xcassets in Resources */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
 /* End PBXResourcesBuildPhase section */
 
 /* Begin PBXSourcesBuildPhase section */
-		YY5002 /* Sources */ = {
+		GG0000000000000000000001 /* Sources */ = {
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
-				YY0001, YY0002, YY0003, YY0004, YY0005, YY0006, YY0007, YY0008, YY0009, YY0010,
-				YY0011, YY0012, YY0013, YY0014, YY0015, YY0016, YY0017, YY0018, YY0019, YY0020,
-				YY0021, YY0022, YY0023, YY0024, YY0025, YY0026, YY0027, YY0028,
-				YY0030 /* YiLianModel.xcdatamodeld in Sources */,
+				AA0000000000000000000001 /* YiLianApp.swift in Sources */,
+				AA0000000000000000000002 /* TrainingState.swift in Sources */,
+				AA0000000000000000000003 /* TrainingConfig.swift in Sources */,
+				AA0000000000000000000004 /* TrainingSession.swift in Sources */,
+				AA0000000000000000000005 /* TrainingStateMachine.swift in Sources */,
+				AA0000000000000000000006 /* VoiceService.swift in Sources */,
+				AA0000000000000000000007 /* TimerScheduler.swift in Sources */,
+				AA0000000000000000000008 /* CoreDataStack.swift in Sources */,
+				AA0000000000000000000009 /* LocalAuthManager.swift in Sources */,
+				AA0000000000000000000010 /* HapticManager.swift in Sources */,
+				AA0000000000000000000011 /* TrainingViewModel.swift in Sources */,
+				AA0000000000000000000012 /* RecordsViewModel.swift in Sources */,
+				AA0000000000000000000013 /* SettingsViewModel.swift in Sources */,
+				AA0000000000000000000014 /* PrepareView.swift in Sources */,
+				AA0000000000000000000015 /* ArousalView.swift in Sources */,
+				AA0000000000000000000016 /* LowArousalView.swift in Sources */,
+				AA0000000000000000000017 /* ControlZoneView.swift in Sources */,
+				AA0000000000000000000018 /* StopWaitingView.swift in Sources */,
+				AA0000000000000000000019 /* SqueezeView.swift in Sources */,
+				AA0000000000000000000020 /* FinishedView.swift in Sources */,
+				AA0000000000000000000021 /* LockView.swift in Sources */,
+				AA0000000000000000000022 /* RecordsView.swift in Sources */,
+				AA0000000000000000000023 /* SettingsView.swift in Sources */,
+				AA0000000000000000000024 /* BreathingCircle.swift in Sources */,
+				AA0000000000000000000025 /* ContentView.swift in Sources */,
+				AA0000000000000000000026 /* Color+Theme.swift in Sources */,
+				AA0000000000000000000027 /* VoiceScripts.swift in Sources */,
+				AA0000000000000000000028 /* TrainingContainerView.swift in Sources */,
+				AA0000000000000000000030 /* Model.xcdatamodeld in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
 /* End PBXSourcesBuildPhase section */
 
 /* Begin XCBuildConfiguration section */
-		YY7001 /* Debug */ = {
+		FF0000000000000000000011 /* Debug */ = {
 			isa = XCBuildConfiguration;
 			buildSettings = {
 				ALWAYS_SEARCH_USER_PATHS = NO;
@@ -288,7 +313,10 @@
 				ENABLE_TESTABILITY = YES;
 				GCC_DYNAMIC_NO_PIC = NO;
 				GCC_OPTIMIZATION_LEVEL = 0;
-				GCC_PREPROCESSOR_DEFINITIONS = ("DEBUG=1", "$(inherited)");
+				GCC_PREPROCESSOR_DEFINITIONS = (
+					"DEBUG=1",
+					"$(inherited)",
+				);
 				IPHONEOS_DEPLOYMENT_TARGET = 15.0;
 				MTL_ENABLE_DEBUG_INFO = INCLUDE_SOURCE;
 				ONLY_ACTIVE_ARCH = YES;
@@ -297,7 +325,7 @@
 			};
 			name = Debug;
 		};
-		YY7002 /* Release */ = {
+		FF0000000000000000000012 /* Release */ = {
 			isa = XCBuildConfiguration;
 			buildSettings = {
 				ALWAYS_SEARCH_USER_PATHS = NO;
@@ -316,7 +344,7 @@
 			};
 			name = Release;
 		};
-		YY7003 /* Debug */ = {
+		FF0000000000000000000013 /* Debug */ = {
 			isa = XCBuildConfiguration;
 			buildSettings = {
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
@@ -326,7 +354,10 @@
 				ENABLE_PREVIEWS = YES;
 				GENERATE_INFOPLIST_FILE = NO;
 				INFOPLIST_FILE = "毅练/Info.plist";
-				LD_RUNPATH_SEARCH_PATHS = ("$(inherited)", "@executable_path/Frameworks");
+				LD_RUNPATH_SEARCH_PATHS = (
+					"$(inherited)",
+					"@executable_path/Frameworks",
+				);
 				MARKETING_VERSION = 1.0;
 				PRODUCT_BUNDLE_IDENTIFIER = com.yilian.app;
 				PRODUCT_NAME = "$(TARGET_NAME)";
@@ -335,7 +366,7 @@
 			};
 			name = Debug;
 		};
-		YY7004 /* Release */ = {
+		FF0000000000000000000014 /* Release */ = {
 			isa = XCBuildConfiguration;
 			buildSettings = {
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
@@ -345,7 +376,10 @@
 				ENABLE_PREVIEWS = YES;
 				GENERATE_INFOPLIST_FILE = NO;
 				INFOPLIST_FILE = "毅练/Info.plist";
-				LD_RUNPATH_SEARCH_PATHS = ("$(inherited)", "@executable_path/Frameworks");
+				LD_RUNPATH_SEARCH_PATHS = (
+					"$(inherited)",
+					"@executable_path/Frameworks",
+				);
 				MARKETING_VERSION = 1.0;
 				PRODUCT_BUNDLE_IDENTIFIER = com.yilian.app;
 				PRODUCT_NAME = "$(TARGET_NAME)";
@@ -357,25 +391,25 @@
 /* End XCBuildConfiguration section */
 
 /* Begin XCConfigurationList section */
-		YY6002 /* Build configuration list for PBXNativeTarget "毅练" */ = {
+		FF0000000000000000000002 /* Build configuration list for PBXNativeTarget "毅练" */ = {
 			isa = XCConfigurationList;
 			buildConfigurations = (
-				YY7003 /* Debug */,
-				YY7004 /* Release */,
+				FF0000000000000000000013 /* Debug */,
+				FF0000000000000000000014 /* Release */,
 			);
 			defaultConfigurationIsVisible = 0;
 			defaultConfigurationName = Release;
 		};
-		YY6003 /* Build configuration list for PBXProject "毅练" */ = {
+		FF0000000000000000000003 /* Build configuration list for PBXProject "毅练" */ = {
 			isa = XCConfigurationList;
 			buildConfigurations = (
-				YY7001 /* Debug */,
-				YY7002 /* Release */,
+				FF0000000000000000000011 /* Debug */,
+				FF0000000000000000000012 /* Release */,
 			);
 			defaultConfigurationIsVisible = 0;
 			defaultConfigurationName = Release;
 		};
 /* End XCConfigurationList section */
 	};
-	rootObject = YY6001 /* Project object */;
+	rootObject = HH0000000000000000000001 /* Project object */;
 }

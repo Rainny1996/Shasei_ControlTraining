@@ -27,64 +27,27 @@ jobs:
             echo "::error::Could not locate 毅练.xcodeproj"
             exit 1
           fi
-          echo "PROJECT_FILE=$PROJECT_FILE" >> "$GITHUB_OUTPUT"
-          echo "Found project at: $PROJECT_FILE"
+          PROJECT_DIR=$(dirname "$PROJECT_FILE")
+          echo "PROJECT_DIR=$PROJECT_DIR" >> "$GITHUB_OUTPUT"
+          echo "Found project at: $PROJECT_FILE (dir: $PROJECT_DIR)"
 
-      - name: Rename xcodeproj to ASCII & diagnose
+      - name: List schemes
+        working-directory: ${{ steps.locate.outputs.PROJECT_DIR }}
         run: |
           set +e
-          # 将中文 .xcodeproj 目录重命名为纯 ASCII
-          mv "毅练.xcodeproj" "YiLian.xcodeproj"
-
-          PBXPROJ="YiLian.xcodeproj/project.pbxproj"
-
-          echo "=== file encoding check ==="
-          file "$PBXPROJ"
-          echo "=== checking for BOM ==="
-          xxd -l 4 "$PBXPROJ"
-
-          echo "=== basic pbxproj sanity check (stdlib only) ==="
-          python3 -c "import codecs; raw=open('YiLian.xcodeproj/project.pbxproj','rb').read(); print('size:', len(raw), 'bytes'); print('has BOM:', raw[:3]==codecs.BOM_UTF8); txt=raw.decode('utf-8', errors='replace'); print('first line:', txt.splitlines()[0] if txt else '(empty)'); print('contains // ! marker:', '// !' in txt)" || echo "(python sanity check skipped)"
-          echo "=== python sanity check finished ==="
-
-          echo "=== grep for non-ASCII in pbxproj ==="
-          grep -nP '[^\x00-\x7F]' "$PBXPROJ" | head -20 || echo "(no non-ASCII found)"
-
-          echo "=== checking xcworkspacedata ==="
-          cat "YiLian.xcodeproj/project.xcworkspace/contents.xcworkspacedata"
-          echo "=== checking IDEWorkspaceChecks.plist ==="
-          plutil -p "YiLian.xcodeproj/project.xcworkspace/xcshareddata/IDEWorkspaceChecks.plist" 2>&1 || echo "plist parse failed"
-
-      - name: Create workspace manually
-        run: |
-          # 用 ASCII 路径
-          ABS_PROJECT="$(pwd)/YiLian.xcodeproj"
-          echo "Absolute project path: $ABS_PROJECT"
-
-          mkdir -p YiLian.xcworkspace
-          cat > YiLian.xcworkspace/contents.xcworkspacedata << XMLEND
-          <?xml version="1.0" encoding="UTF-8"?>
-          <Workspace
-             version = "1.0">
-             <FileRef
-                location = "absolute:${ABS_PROJECT}">
-             </FileRef>
-          </Workspace>
-          XMLEND
-
-          echo "=== workspace contents ==="
-          cat YiLian.xcworkspace/contents.xcworkspacedata
+          echo "=== xcodebuild -list ==="
+          xcodebuild -list -project "毅练.xcodeproj" 2>&1 || echo "(list failed)"
 
       - name: Clean Build
         run: |
-          rm -rf build build-output
           rm -rf ~/Library/Developer/Xcode/DerivedData/* || true
 
       - name: Build App
+        working-directory: ${{ steps.locate.outputs.PROJECT_DIR }}
         run: |
           set -o pipefail
           xcodebuild build \
-            -workspace YiLian.xcworkspace \
+            -project "毅练.xcodeproj" \
             -scheme "毅练" \
             -configuration Release \
             -sdk iphoneos \
@@ -99,13 +62,10 @@ jobs:
           if [ "$BUILD_RC" -ne 0 ]; then
             echo "========== BUILD FAILED (exit $BUILD_RC) =========="
             echo "::error::BUILD FAILED"
-            grep -E "error:|fatal:|** BUILD" build.log | head -40 | while read -r line; do echo "::error::$line"; done
+            grep -E "error:|fatal error:" build.log | head -40 | while read -r line; do echo "::error::$line"; done
             exit 1
           fi
           echo "========== BUILD SUCCEEDED =========="
-          echo "=== .app files in DerivedData ==="
-          find ~/Library/Developer/Xcode/DerivedData -name "*.app" 2>/dev/null || echo "no .app found"
-          tail -20 build.log
 
       - name: Debug - List build products
         if: always()
@@ -118,9 +78,7 @@ jobs:
           set -o pipefail
           APP_PATH=$(find ~/Library/Developer/Xcode/DerivedData -name "*.app" | head -1)
           if [ -z "$APP_PATH" ]; then
-            echo "ERROR: Could not find any .app"
             echo "::error::Could not find any .app"
-            find ~/Library/Developer/Xcode/DerivedData -maxdepth 6 -name "*.app" 2>/dev/null | head -60
             exit 1
           fi
           echo "Found app at: $APP_PATH"
@@ -144,5 +102,5 @@ jobs:
         if: failure()
         with:
           name: build-log
-          path: build.log
+          path: "**/build.log"
           retention-days: 7
