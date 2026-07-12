@@ -30,18 +30,39 @@ jobs:
           echo "PROJECT_FILE=$PROJECT_FILE" >> "$GITHUB_OUTPUT"
           echo "Found project at: $PROJECT_FILE"
 
-      - name: Rename xcodeproj to ASCII & fix references
+      - name: Rename xcodeproj to ASCII & diagnose
         run: |
-          # 将中文 .xcodeproj 目录重命名为纯 ASCII，验证是否是中文路径导致 Xcode 解析崩溃
-          OLD_NAME="毅练.xcodeproj"
-          NEW_NAME="YiLian.xcodeproj"
-          echo "Renaming $OLD_NAME -> $NEW_NAME"
-          mv "$OLD_NAME" "$NEW_NAME"
+          # 将中文 .xcodeproj 目录重命名为纯 ASCII
+          mv "毅练.xcodeproj" "YiLian.xcodeproj"
 
-          # 修改 pbxproj 内部引用：把 毅练/Info.plist 改为 ASCII 路径
-          # 源码目录仍然是 毅练/，但 .xcodeproj 名改为 ASCII
-          echo "=== pbxproj 内部路径引用 ==="
-          grep -n "毅练" "$NEW_NAME/project.pbxproj" | head -20
+          PBXPROJ="YiLian.xcodeproj/project.pbxproj"
+
+          echo "=== file encoding check ==="
+          file "$PBXPROJ"
+          echo "=== checking for BOM ==="
+          xxd -l 4 "$PBXPROJ"
+
+          echo "=== try parsing with python pbxproj ==="
+          pip3 install --quiet pbxproj 2>/dev/null || true
+          python3 -c "
+import sys
+try:
+    from pbxproj import XcodeProject
+    p = XcodeProject.load('$PBXPROJ')
+    print('pbxproj parsed OK, objectVersion:', p.root_object.get('objectVersion','?'))
+    print('targets:', [t.name for t in p.objects.get_targets()])
+except Exception as e:
+    print('pbxproj parse FAILED:', str(e))
+    sys.exit(1)
+" 2>&1 || echo "=== python pbxproj parse attempt finished ==="
+
+          echo "=== grep for non-ASCII in pbxproj ==="
+          grep -nP '[^\x00-\x7F]' "$PBXPROJ" | head -20 || echo "(no non-ASCII found)"
+
+          echo "=== checking xcworkspacedata ==="
+          cat "YiLian.xcodeproj/project.xcworkspace/contents.xcworkspacedata"
+          echo "=== checking IDEWorkspaceChecks.plist ==="
+          plutil -p "YiLian.xcodeproj/project.xcworkspace/xcshareddata/IDEWorkspaceChecks.plist" 2>&1 || echo "plist parse failed"
 
       - name: Create workspace manually
         run: |
