@@ -18,40 +18,53 @@ jobs:
         run: |
           sudo xcode-select -switch /Applications/Xcode.app
           xcodebuild -version
+          swift --version
 
       - name: Locate project
         id: locate
         run: |
-          PROJECT_FILE=$(find . -name "毅练.xcodeproj" -maxdepth 3 | head -1)
+          PROJECT_FILE=$(find . -name "*.xcodeproj" -maxdepth 3 | head -1)
           if [ -z "$PROJECT_FILE" ]; then
-            echo "::error::Could not locate 毅练.xcodeproj"
+            echo "::error::Could not locate any .xcodeproj"
             exit 1
           fi
+          PROJECT_NAME=$(basename "$PROJECT_FILE")
           PROJECT_DIR=$(dirname "$PROJECT_FILE")
           echo "PROJECT_DIR=$PROJECT_DIR" >> "$GITHUB_OUTPUT"
-          echo "Found project at: $PROJECT_FILE (dir: $PROJECT_DIR)"
+          echo "PROJECT_NAME=$PROJECT_NAME" >> "$GITHUB_OUTPUT"
+          echo "Found project: $PROJECT_FILE"
 
-      - name: List schemes
+      - name: Detect scheme
+        id: scheme
         working-directory: ${{ steps.locate.outputs.PROJECT_DIR }}
         run: |
           set +e
           echo "=== xcodebuild -list ==="
-          xcodebuild -list -project "毅练.xcodeproj" 2>&1 || echo "(list failed)"
+          LIST_OUTPUT=$(xcodebuild -list -project "${{ steps.locate.outputs.PROJECT_NAME }}" 2>&1)
+          echo "$LIST_OUTPUT"
+          # 提取 Schemes 段落里的第一个 scheme
+          SCHEME=$(echo "$LIST_OUTPUT" | awk '/Schemes:/{flag=1; next} flag && NF {gsub(/^[ \t]+/,""); print; exit}')
+          if [ -z "$SCHEME" ]; then
+            echo "::warning::Could not auto-detect scheme, falling back to 毅练"
+            SCHEME="毅练"
+          fi
+          echo "Using scheme: $SCHEME"
+          echo "SCHEME=$SCHEME" >> "$GITHUB_OUTPUT"
 
-      - name: Clean Build
-        run: |
-          rm -rf ~/Library/Developer/Xcode/DerivedData/* || true
+      - name: Clean DerivedData
+        run: rm -rf ~/Library/Developer/Xcode/DerivedData/* || true
 
-      - name: Build App
+      - name: Build App (unsigned)
         working-directory: ${{ steps.locate.outputs.PROJECT_DIR }}
         run: |
           set -o pipefail
           xcodebuild build \
-            -project "毅练.xcodeproj" \
-            -scheme "毅练" \
+            -project "${{ steps.locate.outputs.PROJECT_NAME }}" \
+            -scheme "${{ steps.scheme.outputs.SCHEME }}" \
             -configuration Release \
             -sdk iphoneos \
             -arch arm64 \
+            -derivedDataPath ./build \
             CODE_SIGNING_ALLOWED=NO \
             CODE_SIGNING_REQUIRED=NO \
             CODE_SIGN_IDENTITY="" \
@@ -67,26 +80,32 @@ jobs:
           fi
           echo "========== BUILD SUCCEEDED =========="
 
-      - name: Debug - List build products
+      - name: List build products
         if: always()
+        working-directory: ${{ steps.locate.outputs.PROJECT_DIR }}
         run: |
-          echo "=== .app files in DerivedData ==="
-          find ~/Library/Developer/Xcode/DerivedData -name "*.app" 2>/dev/null || echo "none"
+          echo "=== .app files ==="
+          find ./build -name "*.app" 2>/dev/null || echo "none"
 
       - name: Create IPA
+        working-directory: ${{ steps.locate.outputs.PROJECT_DIR }}
         run: |
           set -o pipefail
-          APP_PATH=$(find ~/Library/Developer/Xcode/DerivedData -name "*.app" | head -1)
+          APP_PATH=$(find ./build -path "*Release-iphoneos/*.app" -maxdepth 5 | head -1)
+          if [ -z "$APP_PATH" ]; then
+            APP_PATH=$(find ./build -name "*.app" | head -1)
+          fi
           if [ -z "$APP_PATH" ]; then
             echo "::error::Could not find any .app"
             exit 1
           fi
           echo "Found app at: $APP_PATH"
           rm -rf "$APP_PATH"/PlugIns 2>/dev/null || true
+          rm -rf Payload
           mkdir -p Payload
           cp -r "$APP_PATH" Payload/
-          zip -r YiLian.ipa Payload
-          echo "IPA created"
+          zip -qr YiLian.ipa Payload
+          echo "IPA created:"
           ls -la YiLian.ipa
 
       - name: Upload IPA
@@ -94,7 +113,7 @@ jobs:
         if: success()
         with:
           name: YiLian-ipa
-          path: YiLian.ipa
+          path: ${{ steps.locate.outputs.PROJECT_DIR }}/YiLian.ipa
           retention-days: 30
 
       - name: Upload build log on failure
