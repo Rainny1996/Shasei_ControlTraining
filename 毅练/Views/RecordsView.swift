@@ -1,23 +1,26 @@
 import SwiftUI
 import UIKit
 
-/// 训练记录页：列表 + 自绘趋势折线图（iOS 15 兼容，不用 Charts）
+/// 训练记录页：列表 + 自绘趋势折线图 + 最新状态雷达图（玻璃卡片化）
 struct RecordsView: View {
     @StateObject private var vm = RecordsViewModel()
 
     var body: some View {
-        NavigationView {
+        NavigationStack {
             ScrollView {
-                VStack(spacing: 24) {
+                VStack(spacing: 20) {
                     // 最新状态雷达图
                     RadarCardView(scores: vm.latestRadarScores())
                         .padding(.horizontal, 16)
 
                     if !vm.chartData.isEmpty {
-                        TrendChartView(data: vm.chartData)
-                            .frame(height: 180)
-                            .padding(.horizontal, 16)
+                        GlassCard {
+                            TrendChartView(data: vm.chartData)
+                                .frame(height: 180)
+                        }
+                        .padding(.horizontal, 16)
                     }
+
                     LazyVStack(spacing: 12) {
                         ForEach(vm.sessions, id: \.id) { s in
                             NavigationLink(destination: RecordDetailView(session: s)) {
@@ -26,9 +29,10 @@ struct RecordsView: View {
                         }
                     }
                     .padding(.horizontal, 16)
+
                     Button(action: export) {
                         Label("导出加密数据", systemImage: "square.and.arrow.up")
-                            .foregroundColor(.ylGreen)
+                            .foregroundColor(.ylSuccess)
                     }
                     .padding(.top, 8)
                 }
@@ -37,7 +41,6 @@ struct RecordsView: View {
             .navigationTitle("训练记录")
             .onAppear { vm.reload() }
         }
-        .navigationViewStyle(.stack)
     }
 
     private func export() {
@@ -58,21 +61,20 @@ struct RecordRow: View {
         return f.string(from: d)
     }
     var body: some View {
-        VStack(alignment: .leading, spacing: 6) {
-            HStack {
-                Text(dateText).font(.system(size: 16, weight: .semibold)).foregroundColor(.ylText)
-                Spacer()
-                Text("\(session.totalDuration / 60) 分").font(.system(size: 14)).foregroundColor(.ylTextSecondary)
-            }
-            HStack(spacing: 16) {
-                Tag(text: "循环 \(session.cycleCount)")
-                Tag(text: session.usedSqueeze ? "使用挤捏" : "未挤捏")
-                if session.prematureEjaculation { Tag(text: "提前射精", color: .ylRed) }
+        GlassCard {
+            VStack(alignment: .leading, spacing: 6) {
+                HStack {
+                    Text(dateText).font(.system(size: 16, weight: .semibold)).foregroundColor(.ylText)
+                    Spacer()
+                    Text("\(session.totalDuration / 60) 分").font(.system(size: 14)).foregroundColor(.ylTextSecondary)
+                }
+                HStack(spacing: 16) {
+                    Tag(text: "循环 \(session.cycleCount)")
+                    Tag(text: session.usedSqueeze ? "使用挤捏" : "未挤捏")
+                    if session.prematureEjaculation { Tag(text: "提前射精", color: .ylWarning) }
+                }
             }
         }
-        .padding(16)
-        .background(Color.ylBackground2)
-        .cornerRadius(16)
     }
 }
 
@@ -90,25 +92,24 @@ struct Tag: View {
 struct RadarCardView: View {
     let scores: [String: Double]
     var body: some View {
-        VStack(alignment: .leading, spacing: 8) {
-            Text("最新状态解析")
-                .font(.system(size: 16, weight: .semibold))
-                .foregroundColor(.ylText)
-            let items = RecordsViewModel.radarDimensions.map { ($0, scores[$0] ?? 0) }
-            if items.contains(where: { $0.1 > 0 }) {
-                RadarChartView(scores: items)
-                    .frame(height: 240)
-            } else {
-                Text("暂无训练数据")
-                    .font(.system(size: 14))
-                    .foregroundColor(.ylTextSecondary)
-                    .frame(height: 120)
-                    .frame(maxWidth: .infinity, alignment: .center)
+        GlassCard {
+            VStack(alignment: .leading, spacing: 8) {
+                Text("最新状态解析")
+                    .font(.system(size: 16, weight: .semibold))
+                    .foregroundColor(.ylText)
+                let items = RecordsViewModel.radarDimensions.map { ($0, scores[$0] ?? 0) }
+                if items.contains(where: { $0.1 > 0 }) {
+                    RadarChartView(scores: items)
+                        .frame(height: 240)
+                } else {
+                    Text("暂无训练数据")
+                        .font(.system(size: 14))
+                        .foregroundColor(.ylTextSecondary)
+                        .frame(height: 120)
+                        .frame(maxWidth: .infinity, alignment: .center)
+                }
             }
         }
-        .padding(16)
-        .background(Color.ylBackground2)
-        .cornerRadius(16)
     }
 }
 
@@ -127,7 +128,7 @@ struct TrendChartView: View {
                     else { path.addLine(to: CGPoint(x: x, y: y)) }
                 }
             }
-            .stroke(Color.ylGreen, lineWidth: 3)
+            .stroke(Color.ylSuccess, lineWidth: 3)
             .overlay(
                 Text("可控区间平均时长趋势").font(.system(size: 12)).foregroundColor(.ylTextSecondary)
                     .padding(8), alignment: .topLeading

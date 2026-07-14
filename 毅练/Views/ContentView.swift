@@ -28,7 +28,7 @@ struct ContentView: View {
                         .tag(Tab.settings)
                         .tabItem { Label("设置", systemImage: "gearshape") }
                 }
-                .accentColor(.ylGreen)
+                .tint(.ylSuccess)
                 .overlay(
                     trainingVM.isTrainingActive ?
                     TrainingContainerView(vm: trainingVM).ignoresSafeArea() : nil
@@ -63,24 +63,27 @@ struct TrainHomeView: View {
 
     var body: some View {
         ZStack {
-            Color.ylBackground.ignoresSafeArea()
-            VStack(spacing: 32) {
+            LinearGradient.ylDark.ignoresSafeArea()
+            VStack(spacing: 28) {
                 Spacer()
                 Image(systemName: "heart.circle.fill")
-                    .font(.system(size: 72)).foregroundColor(.ylGreen)
-                Text("控时训练")
-                    .font(.system(size: 30, weight: .bold)).foregroundColor(.ylText)
-                Text("跟随语音引导，完成高质量行为训练")
-                    .font(.system(size: 16)).foregroundColor(.ylTextSecondary)
-                    .multilineTextAlignment(.center).padding(.horizontal, 40)
-                Spacer()
-                Button(action: startTraining) {
-                    Text("开始训练")
-                        .font(.system(size: 20, weight: .semibold))
-                        .frame(maxWidth: .infinity).frame(height: 60)
-                        .background(Color.ylGreen).foregroundColor(.black).cornerRadius(24)
+                    .font(.system(size: 64)).foregroundColor(.ylSuccess)
+                GlassCard {
+                    VStack(spacing: 8) {
+                        Text("控时训练")
+                            .font(.system(size: 24, weight: .bold))
+                            .foregroundColor(.ylText)
+                        Text("跟随语音引导，完成高质量行为训练")
+                            .font(.system(size: 15))
+                            .foregroundColor(.ylTextSecondary)
+                            .multilineTextAlignment(.center)
+                    }
                 }
-                .padding(.horizontal, 32).padding(.bottom, 40)
+                .padding(.horizontal, 32)
+                Spacer()
+                CoachButton(title: "开始训练", style: .primary) { startTraining() }
+                    .padding(.horizontal, 32)
+                    .padding(.bottom, 40)
             }
         }
     }

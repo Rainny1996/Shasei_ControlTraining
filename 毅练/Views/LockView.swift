@@ -1,6 +1,6 @@
 import SwiftUI
 
-/// 解锁界面：生物识别 / 独立密码
+/// 解锁界面：生物识别 / 独立密码（玻璃化）
 struct LockView: View {
     @EnvironmentObject var appState: AppState
     @State private var showPasswordSheet = false
@@ -9,34 +9,33 @@ struct LockView: View {
 
     var body: some View {
         ZStack {
-            Color.ylBackground.ignoresSafeArea()
-            VStack(spacing: 32) {
+            LinearGradient.ylDark.ignoresSafeArea()
+            VStack(spacing: 28) {
                 Spacer()
-                Image(systemName: "lock.shield.fill")
-                    .font(.system(size: 60))
-                    .foregroundColor(.ylGreen)
-                Text("毅练")
-                    .font(.system(size: 34, weight: .bold))
-                    .foregroundColor(.ylText)
-                Text("私密训练 · 控时训练")
-                    .font(.system(size: 15))
-                    .foregroundColor(.ylTextSecondary)
-                Spacer()
-                Button(action: attemptBio) {
-                    Label("点击解锁", systemImage: "faceid")
-                        .font(.system(size: 18, weight: .semibold))
-                        .frame(maxWidth: .infinity).frame(height: 56)
-                        .background(Color.ylGreen).foregroundColor(.black).cornerRadius(24)
-                }
-                .padding(.horizontal, 32)
-                if LocalAuthManager.shared.isLockConfigured {
-                    Button(action: { showPasswordSheet = true }) {
-                        Text("使用密码")
+                GlassCard {
+                    VStack(spacing: 16) {
+                        Image(systemName: "lock.shield.fill")
+                            .font(.system(size: 48))
+                            .foregroundColor(.ylSuccess)
+                        Text("毅练")
+                            .font(.system(size: 28, weight: .bold))
+                            .foregroundColor(.ylText)
+                        Text("私密训练 · 控时训练")
+                            .font(.system(size: 15))
                             .foregroundColor(.ylTextSecondary)
                     }
                 }
+                .padding(.horizontal, 40)
+                Spacer()
+                CoachButton(title: "点击解锁", systemImage: "faceid", style: .primary) { attemptBio() }
+                    .padding(.horizontal, 32)
+                if LocalAuthManager.shared.isLockConfigured {
+                    Button(action: { showPasswordSheet = true }) {
+                        Text("使用密码").foregroundColor(.ylTextSecondary)
+                    }
+                }
                 if !errorText.isEmpty {
-                    Text(errorText).foregroundColor(.ylRed).font(.system(size: 14))
+                    Text(errorText).foregroundColor(.ylWarning).font(.system(size: 14))
                 }
                 Spacer()
             }
@@ -51,7 +50,6 @@ struct LockView: View {
             if success {
                 withAnimation { appState.isUnlocked = true; appState.isBlurred = false }
             } else if !LocalAuthManager.shared.isLockConfigured {
-                // 首次进入：直接解锁并提示设置
                 withAnimation { appState.isUnlocked = true; appState.isBlurred = false }
             }
         }
@@ -77,19 +75,19 @@ struct PasswordSheet: View {
     @State private var err = ""
 
     var body: some View {
-        NavigationView {
+        NavigationStack {
             VStack(spacing: 20) {
                 SecureField("输入密码", text: $pwd)
                     .textFieldStyle(.roundedBorder).padding(.horizontal)
                 SecureField("确认密码", text: $confirm)
                     .textFieldStyle(.roundedBorder).padding(.horizontal)
-                if !err.isEmpty { Text(err).foregroundColor(.red).font(.system(size: 14)) }
-                Button("确认") {
+                if !err.isEmpty { Text(err).foregroundColor(.ylWarning).font(.system(size: 14)) }
+                CoachButton(title: "确认", style: .primary) {
                     if pwd.count < 4 { err = "密码至少4位"; return }
                     if pwd != confirm { err = "两次输入不一致"; return }
                     if onSubmit(pwd) { dismiss() }
                 }
-                .buttonStyle(.borderedProminent)
+                .padding(.horizontal, 24)
                 Spacer()
             }
             .navigationTitle("设置隐私密码")

@@ -1,6 +1,6 @@
 import SwiftUI
 
-/// 停止-挤压法指导：紫色调 + 先提示动作，点击“开始挤压”后再倒计时
+/// 停止-挤压法指导：紫色渐变 + 先提示动作，点击“开始挤压”后再倒计时
 struct SqueezeView: View {
     let cycle: Int
     let totalCycles: Int
@@ -14,34 +14,38 @@ struct SqueezeView: View {
 
     var body: some View {
         ZStack {
-            Color.ylPurple.ignoresSafeArea()
-            VStack(spacing: 24) {
-                Spacer()
-                Text("停止-挤压法")
-                    .font(.system(size: 30, weight: .bold))
-                    .foregroundColor(.white)
-                Text("第 \(cycle) / \(totalCycles) 轮")
-                    .font(.system(size: 15))
-                    .foregroundColor(.white.opacity(0.8))
-                Text("拇指按在龟头腹侧系带处，食指+中指放在背侧冠状沟，形成 V 字钳。用适中压力挤压 5-10 秒。")
-                    .font(.system(size: 16))
-                    .foregroundColor(.white.opacity(0.9))
-                    .multilineTextAlignment(.center)
-                    .padding(.horizontal, 32)
+            LinearGradient.ylRelease.ignoresSafeArea()
+            VStack(spacing: 22) {
+                Spacer().frame(height: 56)
+                VStack(spacing: 6) {
+                    Text("停止-挤压法")
+                        .font(.system(size: 32, weight: .bold))
+                        .foregroundColor(.white)
+                    Text("第 \(cycle) / \(totalCycles) 轮")
+                        .font(.system(size: 15))
+                        .foregroundColor(.white.opacity(0.8))
+                }
+
+                GlassCard {
+                    Text("拇指按在龟头腹侧系带处，食指+中指放在背侧冠状沟，形成 V 字钳。用适中压力挤压 5-10 秒。")
+                        .font(.system(size: 15))
+                        .foregroundColor(.white.opacity(0.95))
+                        .multilineTextAlignment(.center)
+                }
+                .padding(.horizontal, 24)
 
                 if isCounting {
-                    // 倒计时环
                     ZStack {
                         Circle()
                             .stroke(Color.white.opacity(0.3), lineWidth: 8)
-                            .frame(width: 160, height: 160)
+                            .frame(width: 140, height: 140)
                         Circle()
                             .trim(from: 0, to: CGFloat(remaining) / 8.0)
                             .stroke(Color.white, lineWidth: 8)
-                            .frame(width: 160, height: 160)
+                            .frame(width: 140, height: 140)
                             .rotationEffect(.degrees(-90))
                         Text("\(remaining)")
-                            .font(.system(size: 48, weight: .bold))
+                            .font(.system(size: 44, weight: .bold))
                             .foregroundColor(.white)
                     }
                 } else {
@@ -49,46 +53,17 @@ struct SqueezeView: View {
                         .font(.system(size: 15))
                         .foregroundColor(.white.opacity(0.7))
                 }
+
                 Spacer()
                 VStack(spacing: 12) {
                     if isCounting {
-                        Button(action: onSqueezeDone) {
-                            Text("挤压完成，继续训练")
-                                .font(.system(size: 18, weight: .semibold))
-                                .frame(maxWidth: .infinity)
-                                .frame(height: 56)
-                                .background(Color.white)
-                                .foregroundColor(.ylPurple)
-                                .cornerRadius(24)
-                        }
+                        CoachButton(title: "挤压完成，继续训练", style: .primary) { onSqueezeDone() }
                     } else {
-                        Button(action: startCounting) {
-                            Text("开始挤压")
-                                .font(.system(size: 18, weight: .semibold))
-                                .frame(maxWidth: .infinity)
-                                .frame(height: 56)
-                                .background(Color.white)
-                                .foregroundColor(.ylPurple)
-                                .cornerRadius(24)
-                        }
+                        CoachButton(title: "开始挤压", style: .primary) { startCounting() }
                     }
                     HStack(spacing: 12) {
-                        Button(action: onRetry) {
-                            Text("再挤压一次")
-                                .frame(maxWidth: .infinity)
-                                .frame(height: 48)
-                                .background(Color.white.opacity(0.2))
-                                .foregroundColor(.white)
-                                .cornerRadius(24)
-                        }
-                        Button(action: onEnd) {
-                            Text("结束训练")
-                                .frame(maxWidth: .infinity)
-                                .frame(height: 48)
-                                .background(Color.red.opacity(0.6))
-                                .foregroundColor(.white)
-                                .cornerRadius(24)
-                        }
+                        CoachButton(title: "再挤压一次", style: .secondary) { onRetry() }
+                        CoachButton(title: "结束训练", style: .danger) { onEnd() }
                     }
                 }
                 .padding(.horizontal, 32)

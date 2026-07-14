@@ -1,12 +1,12 @@
 import SwiftUI
 
-/// 设置中心：循环次数 / 等待时长 / 唤醒开关 / 语音参数 / 隐私锁
+/// 设置中心：循环次数 / 等待时长 / 唤醒开关 / 语音参数 / 隐私锁（iOS 26 原生玻璃 Form）
 struct SettingsView: View {
     @StateObject private var vm = SettingsViewModel()
     @State private var showSetPassword = false
 
     var body: some View {
-        NavigationView {
+        NavigationStack {
             Form {
                 Section("训练参数") {
                     Picker("循环次数", selection: $vm.cycleCount) {
@@ -30,7 +30,7 @@ struct SettingsView: View {
                 Section("隐私与安全") {
                     if LocalAuthManager.shared.isLockConfigured {
                         Button("更改隐私密码") { showSetPassword = true }
-                        Text("已启用面容 / 密码锁").font(.system(size: 13)).foregroundColor(.ylGreen)
+                        Text("已启用面容 / 密码锁").font(.system(size: 13)).foregroundColor(.ylSuccess)
                     } else {
                         Button("设置隐私锁") { showSetPassword = true }
                     }
@@ -43,6 +43,7 @@ struct SettingsView: View {
                 }
             }
             .navigationTitle("设置")
+            .tint(.ylSuccess)
         }
         .sheet(isPresented: $showSetPassword) {
             PasswordSheet(onSubmit: { pwd in

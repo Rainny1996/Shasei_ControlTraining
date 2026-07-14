@@ -1,7 +1,7 @@
 import SwiftUI
 
-/// 呼吸圆/光晕动画组件：呼/吸 4:6 秒节奏，颜色按阶段语义切换
-/// iOS 15 兼容版本：用 Timer 驱动动画进度
+/// 呼吸圆/光晕动画组件：呼/吸 4:6 秒节奏，颜色按阶段语义切换。
+/// iOS 26 兼容版：用 Timer 驱动动画进度；新增 focusMode 供停止阶段以呼吸圆为视觉焦点。
 struct BreathingCircle: View {
     /// 吸气时长（秒）
     let inhale: Double
@@ -9,8 +9,10 @@ struct BreathingCircle: View {
     let exhale: Double
     /// 颜色
     let color: Color
-    /// 是否显示倒计时数字（7分等待用）
+    /// 是否显示倒计时数字
     var showCountdown: Int? = nil
+    /// 焦点模式：呼吸圆作为视觉中心，倒计时数字移到圆下方并缩小（停止阶段使用）
+    var focusMode: Bool = false
 
     @State private var elapsed: Double = 0
 
@@ -23,7 +25,7 @@ struct BreathingCircle: View {
             : 1.0 - 0.3 * ((t - inhale) / exhale)
         let opacity: Double = t < inhale ? 0.5 + 0.5 * (t / inhale) : 1.0 - 0.5 * ((t - inhale) / exhale)
 
-        ZStack {
+        let ring = ZStack {
             Circle()
                 .fill(color.opacity(0.25 * opacity))
                 .frame(width: 260, height: 260)
@@ -32,10 +34,29 @@ struct BreathingCircle: View {
                 .stroke(color, lineWidth: 4)
                 .frame(width: 200, height: 200)
                 .scaleEffect(scale)
-            if let count = showCountdown {
-                Text("\(count)")
-                    .font(.system(size: 64, weight: .bold, design: .rounded))
-                    .foregroundColor(.white)
+        }
+
+        Group {
+            if focusMode {
+                VStack(spacing: 14) {
+                    ring
+                    if let count = showCountdown {
+                        Text("\(count)")
+                            .font(.system(size: 40, weight: .bold, design: .rounded))
+                            .foregroundColor(.white)
+                            .monospacedDigit()
+                    }
+                }
+            } else {
+                ZStack {
+                    ring
+                    if let count = showCountdown {
+                        Text("\(count)")
+                            .font(.system(size: 64, weight: .bold, design: .rounded))
+                            .foregroundColor(.white)
+                            .monospacedDigit()
+                    }
+                }
             }
         }
         .onReceive(Timer.publish(every: 0.05, on: .main, in: .common).autoconnect()) { _ in

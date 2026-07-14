@@ -1,6 +1,6 @@
 import SwiftUI
 
-/// 自绘雷达图（iOS 15 兼容，不用 Charts）
+/// 自绘雷达图（iOS 15+ 兼容，不用 Charts）
 /// scores: 维度名 → 0-100 评分；维度顺序决定顶点位置
 struct RadarChartView: View {
     let scores: [(label: String, value: Double)]
@@ -16,8 +16,7 @@ struct RadarChartView: View {
             let angleStep = (2 * CGFloat.pi) / CGFloat(dimensions)
 
             ZStack {
-                // 图形部分（网格、轴线、数据多边形、顶点）用 Canvas 绘制，
-                // 避免 SwiftUI Shape.fill/stroke 在 iOS 15 部署目标下的可用性争议
+                // 图形部分（网格、轴线、数据多边形、顶点）用 Canvas 绘制
                 Canvas { context, _ in
                     // 网格圈层
                     for level in 1...4 {
@@ -51,8 +50,8 @@ struct RadarChartView: View {
                         if i == 0 { dataPath.move(to: p) } else { dataPath.addLine(to: p) }
                     }
                     dataPath.closeSubpath()
-                    context.fill(dataPath, with: .color(Color.ylGreen.opacity(0.25)))
-                    context.stroke(dataPath, with: .color(Color.ylGreen), lineWidth: 2)
+                    context.fill(dataPath, with: .color(Color.ylSuccess.opacity(0.25)))
+                    context.stroke(dataPath, with: .color(Color.ylSuccess), lineWidth: 2)
 
                     // 顶点圆点
                     for (i, item) in scores.enumerated() {
@@ -60,11 +59,11 @@ struct RadarChartView: View {
                         let v = CGFloat(min(max(item.value, 0), maxValue) / maxValue)
                         let p = CGPoint(x: center.x + radius * v * cos(angle), y: center.y + radius * v * sin(angle))
                         let dot = Path(ellipseIn: CGRect(x: p.x - 3, y: p.y - 3, width: 6, height: 6))
-                        context.fill(dot, with: .color(Color.ylGreen))
+                        context.fill(dot, with: .color(Color.ylSuccess))
                     }
                 }
 
-                // 标签部分用 SwiftUI Text 叠加（不依赖 Shape 修饰符）
+                // 标签部分用 SwiftUI Text 叠加
                 verticesAndLabels(center: center, radius: radius, angleStep: angleStep)
             }
         }

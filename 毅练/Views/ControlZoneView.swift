@@ -1,6 +1,6 @@
 import SwiftUI
 
-/// 可控区间（4-6分）：黄背景 + 中央超大按钮“我到了7分（立刻停止）”
+/// 可控区间（4-6分）：暖橙黄渐变 + 目标卡/自检清单 + 醒目圆形停止按钮
 struct ControlZoneView: View {
     let cycle: Int
     let totalCycles: Int
@@ -11,62 +11,79 @@ struct ControlZoneView: View {
 
     var body: some View {
         ZStack {
-            Color.ylYellow.ignoresSafeArea()
+            LinearGradient.ylControl.ignoresSafeArea()
             // 右上角：中途射精按钮
             VStack {
                 HStack {
                     Spacer()
-                    Button(action: onEjaculated) {
-                        Text("我已射精")
-                            .font(.system(size: 13, weight: .medium))
-                            .foregroundColor(.black.opacity(0.55))
-                            .padding(.horizontal, 14)
-                            .padding(.vertical, 8)
-                            .background(Color.black.opacity(0.08))
-                            .cornerRadius(16)
-                    }
-                    .padding(.top, 16)
-                    .padding(.trailing, 16)
+                    CoachButton(title: "我已射精", height: 44, style: .danger) { onEjaculated() }
+                        .frame(width: 110)
+                        .padding(.top, 56)
+                        .padding(.trailing, 16)
                 }
                 Spacer()
             }
-            VStack(spacing: 24) {
-                Spacer()
-                Text("快感可控（4-6分）")
-                    .font(.system(size: 34, weight: .bold))
-                    .foregroundColor(.black)
-                Text("第 \(cycle) / \(totalCycles) 轮")
-                    .font(.system(size: 15))
-                    .foregroundColor(.black.opacity(0.6))
-                Text("保持在 5-6 分，享受")
-                    .font(.system(size: 17))
-                    .foregroundColor(.black.opacity(0.7))
-                Spacer()
-                VStack(spacing: 16) {
-                    Button(action: onReachedSeven) {
-                        Text("我到了 7 分\n（立刻停止）")
-                            .font(.system(size: 28, weight: .bold))
-                            .multilineTextAlignment(.center)
-                            .frame(width: 260, height: 260)
-                            .background(Color.white)
-                            .foregroundColor(.black)
-                            .clipShape(Circle())
-                    }
-                    if let finalAction = onEjaculateReady {
-                        Button(action: finalAction) {
-                            Text("我已准备好射精")
-                                .font(.system(size: 18, weight: .semibold))
-                                .frame(maxWidth: .infinity)
-                                .frame(height: 52)
-                                .background(Color.ylPurple)
-                                .foregroundColor(.white)
-                                .cornerRadius(24)
+
+            VStack(spacing: 20) {
+                Spacer().frame(height: 56)
+                VStack(spacing: 8) {
+                    Text("快感可控")
+                        .font(.system(size: 36, weight: .bold))
+                        .foregroundColor(.black)
+                    Text("4-6 分")
+                        .font(.system(size: 22, weight: .semibold))
+                        .foregroundColor(.black.opacity(0.7))
+                    Text("第 \(cycle) / \(totalCycles) 轮")
+                        .font(.system(size: 15, weight: .medium))
+                        .foregroundColor(.black.opacity(0.55))
+                }
+
+                GlassCard {
+                    VStack(alignment: .leading, spacing: 12) {
+                        HStack(spacing: 8) {
+                            Image(systemName: "target").foregroundColor(.black.opacity(0.7))
+                            Text("当前目标：保持 5-6 分")
+                                .font(.system(size: 17, weight: .medium))
+                                .foregroundColor(.black)
                         }
-                        .padding(.horizontal, 32)
+                        checkRow("呼吸放慢")
+                        checkRow("盆底放松")
+                        checkRow("手速放慢")
+                        checkRow("不要追求高潮")
                     }
                 }
+                .padding(.horizontal, 24)
+
                 Spacer()
+                // 醒目圆形「我到了 7 分」按钮
+                Button(action: onReachedSeven) {
+                    VStack(spacing: 4) {
+                        Text("我到了 7 分")
+                            .font(.system(size: 26, weight: .bold))
+                        Text("立刻停止")
+                            .font(.system(size: 16, weight: .medium))
+                    }
+                    .foregroundColor(.black)
+                    .frame(width: 220, height: 220)
+                }
+                .glassEffect(in: Circle())
+
+                if let finalAction = onEjaculateReady {
+                    CoachButton(title: "我已准备好射精", style: .primary) { finalAction() }
+                        .padding(.horizontal, 32)
+                }
+                Spacer().frame(height: 40)
             }
+        }
+    }
+
+    private func checkRow(_ text: String) -> some View {
+        HStack(spacing: 8) {
+            Image(systemName: "checkmark.circle.fill")
+                .foregroundColor(.black.opacity(0.55))
+            Text(text)
+                .font(.system(size: 15))
+                .foregroundColor(.black.opacity(0.85))
         }
     }
 }

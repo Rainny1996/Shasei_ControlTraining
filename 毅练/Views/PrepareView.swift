@@ -15,37 +15,31 @@ struct PrepareView: View {
 
     var body: some View {
         ZStack {
-            Color.ylBackground.ignoresSafeArea()
-            VStack(spacing: 32) {
+            LinearGradient.ylDark.ignoresSafeArea()
+            VStack(spacing: 28) {
                 Spacer()
                 Text("训练准备")
-                    .font(.system(size: 34, weight: .bold))
+                    .font(.system(size: 30, weight: .bold))
                     .foregroundColor(.ylText)
-                VStack(alignment: .leading, spacing: 16) {
-                    ForEach(0..<visibleRows, id: \.self) { i in
-                        HStack(spacing: 12) {
-                            Image(systemName: items[i].icon)
-                                .foregroundColor(items[i].ok ? .ylGreen : .ylRed)
-                            Text(items[i].text)
-                                .font(.system(size: 17))
-                                .foregroundColor(.ylText)
+                GlassCard {
+                    VStack(alignment: .leading, spacing: 16) {
+                        ForEach(0..<visibleRows, id: \.self) { i in
+                            HStack(spacing: 12) {
+                                Image(systemName: items[i].icon)
+                                    .foregroundColor(items[i].ok ? .ylSuccess : .ylWarning)
+                                Text(items[i].text)
+                                    .font(.system(size: 16))
+                                    .foregroundColor(.ylText)
+                            }
+                            .transition(.opacity.combined(with: .move(edge: .leading)))
                         }
-                        .transition(.opacity.combined(with: .move(edge: .leading)))
                     }
                 }
-                .padding(.horizontal, 32)
+                .padding(.horizontal, 24)
                 Spacer()
-                Button(action: onPrepared) {
-                    Text("我已准备好")
-                        .font(.system(size: 20, weight: .semibold))
-                        .frame(maxWidth: .infinity)
-                        .frame(height: 56)
-                        .background(Color.ylGreen)
-                        .foregroundColor(.black)
-                        .cornerRadius(24)
-                }
-                .padding(.horizontal, 32)
-                .padding(.bottom, 40)
+                CoachButton(title: "我已准备好", style: .primary) { onPrepared() }
+                    .padding(.horizontal, 32)
+                    .padding(.bottom, 40)
             }
         }
         .onAppear {

@@ -1,6 +1,6 @@
 import SwiftUI
 
-/// 7分调整等待：红背景 + 呼吸圆 + 倒计时 + 随时可点的回落按钮 + 双指长按
+/// 7分调整等待：橙红渐变 + 呼吸圆焦点 + 倒计时下移 + 随时可点的回落按钮 + 双指长按
 struct StopWaitingView: View {
     let countdown: Int
     let cycle: Int
@@ -12,7 +12,7 @@ struct StopWaitingView: View {
     var body: some View {
         ZStack {
             // 双指长按手势只挂在背景层，绝不覆盖内容/按钮，避免拦截点击
-            Color.ylRed
+            LinearGradient.ylStop
                 .ignoresSafeArea()
                 .gesture(
                     LongPressGesture(minimumDuration: 1.0)
@@ -23,45 +23,53 @@ struct StopWaitingView: View {
             VStack {
                 HStack {
                     Spacer()
-                    Button(action: onEjaculated) {
-                        Text("我已射精")
-                            .font(.system(size: 13, weight: .medium))
-                            .foregroundColor(.white.opacity(0.85))
-                            .padding(.horizontal, 14)
-                            .padding(.vertical, 8)
-                            .background(Color.white.opacity(0.15))
-                            .cornerRadius(16)
+                    CoachButton(title: "我已射精", height: 44, style: .danger) { onEjaculated() }
+                        .frame(width: 110)
+                        .padding(.top, 56)
+                        .padding(.trailing, 16)
+                }
+                Spacer()
+            }
+
+            VStack(spacing: 20) {
+                Spacer().frame(height: 56)
+                VStack(spacing: 6) {
+                    Text("停止刺激")
+                        .font(.system(size: 32, weight: .bold))
+                        .foregroundColor(.white)
+                    Text("第 \(cycle) / \(totalCycles) 轮")
+                        .font(.system(size: 15))
+                        .foregroundColor(.white.opacity(0.8))
+                }
+
+                // 呼吸圆为视觉焦点，倒计时数字移到圆下方
+                BreathingCircle(inhale: 4, exhale: 6, color: .white,
+                                showCountdown: countdown, focusMode: true)
+
+                GlassCard {
+                    VStack(alignment: .leading, spacing: 10) {
+                        guidanceRow("深呼吸：呼—— 吸——")
+                        guidanceRow("盆底完全放松")
+                        guidanceRow("硬度下降属于正常现象")
                     }
-                    .padding(.top, 16)
-                    .padding(.trailing, 16)
                 }
+                .padding(.horizontal, 24)
+
                 Spacer()
+                CoachButton(title: "回落完成，继续刺激", style: .primary) { onFallBackConfirmed() }
+                    .padding(.horizontal, 32)
+                    .padding(.bottom, 40)
             }
-            VStack(spacing: 24) {
-                Spacer()
-                Text("停止一切刺激")
-                    .font(.system(size: 30, weight: .bold))
-                    .foregroundColor(.white)
-                Text("第 \(cycle) / \(totalCycles) 轮")
-                    .font(.system(size: 15))
-                    .foregroundColor(.white.opacity(0.8))
-                BreathingCircle(inhale: 4, exhale: 6, color: .green, showCountdown: countdown)
-                Text("硬度略降完全正常")
-                    .font(.system(size: 15))
-                    .foregroundColor(.white.opacity(0.7))
-                Spacer()
-                Button(action: onFallBackConfirmed) {
-                    Text("回落完成，继续刺激")
-                        .font(.system(size: 18, weight: .semibold))
-                        .frame(maxWidth: .infinity)
-                        .frame(height: 56)
-                        .background(Color.white)
-                        .foregroundColor(.black)
-                        .cornerRadius(24)
-                }
-                .padding(.horizontal, 32)
-                .padding(.bottom, 40)
-            }
+        }
+    }
+
+    private func guidanceRow(_ text: String) -> some View {
+        HStack(spacing: 8) {
+            Image(systemName: "checkmark.circle.fill")
+                .foregroundColor(.white.opacity(0.85))
+            Text(text)
+                .font(.system(size: 15))
+                .foregroundColor(.white.opacity(0.95))
         }
     }
 }

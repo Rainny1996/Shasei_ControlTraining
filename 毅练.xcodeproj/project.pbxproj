@@ -39,6 +39,9 @@
 		AA0000000000000000000028 /* TrainingContainerView.swift in Sources */ = {isa = PBXBuildFile; fileRef = BB0000000000000000000028 /* TrainingContainerView.swift */; };
 		AA0000000000000000000029 /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = BB0000000000000000000029 /* Assets.xcassets */; };
 		AA0000000000000000000030 /* Model.xcdatamodeld in Sources */ = {isa = PBXBuildFile; fileRef = BB0000000000000000000030 /* Model.xcdatamodeld */; };
+		AA0000000000000000000043 /* CoachButton.swift in Sources */ = {isa = PBXBuildFile; fileRef = BB0000000000000000000043 /* CoachButton.swift */; };
+		AA0000000000000000000044 /* GlassCard.swift in Sources */ = {isa = PBXBuildFile; fileRef = BB0000000000000000000044 /* GlassCard.swift */; };
+		AA0000000000000000000045 /* StageProgressView.swift in Sources */ = {isa = PBXBuildFile; fileRef = BB0000000000000000000045 /* StageProgressView.swift */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXFileReference section */
@@ -76,6 +79,9 @@
 		BB0000000000000000000030 /* Model.xcdatamodeld */ = {isa = PBXFileReference; lastKnownFileType = wrapper.xcdatamodeld; path = Model.xcdatamodeld; sourceTree = "<group>"; };
 		BB0000000000000000000031 /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
 		BB0000000000000000000032 /* 毅练.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = "毅练.app"; sourceTree = BUILT_PRODUCTS_DIR; };
+		BB0000000000000000000043 /* CoachButton.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CoachButton.swift; sourceTree = "<group>"; };
+		BB0000000000000000000044 /* GlassCard.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = GlassCard.swift; sourceTree = "<group>"; };
+		BB0000000000000000000045 /* StageProgressView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = StageProgressView.swift; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -190,6 +196,9 @@
 				BB0000000000000000000025 /* ContentView.swift */,
 				BB0000000000000000000026 /* Color+Theme.swift */,
 				BB0000000000000000000028 /* TrainingContainerView.swift */,
+				BB0000000000000000000043 /* CoachButton.swift */,
+				BB0000000000000000000044 /* GlassCard.swift */,
+				BB0000000000000000000045 /* StageProgressView.swift */,
 			);
 			path = Views;
 			sourceTree = "<group>";
@@ -297,6 +306,9 @@
 				AA0000000000000000000022 /* RecordsView.swift in Sources */,
 				AA0000000000000000000041 /* RadarChartView.swift in Sources */,
 				AA0000000000000000000042 /* RecordDetailView.swift in Sources */,
+				AA0000000000000000000043 /* CoachButton.swift in Sources */,
+				AA0000000000000000000044 /* GlassCard.swift in Sources */,
+				AA0000000000000000000045 /* StageProgressView.swift in Sources */,
 				AA0000000000000000000023 /* SettingsView.swift in Sources */,
 				AA0000000000000000000024 /* BreathingCircle.swift in Sources */,
 				AA0000000000000000000025 /* ContentView.swift in Sources */,
@@ -327,7 +339,7 @@
 					"DEBUG=1",
 					"$(inherited)",
 				);
-				IPHONEOS_DEPLOYMENT_TARGET = 15.0;
+				IPHONEOS_DEPLOYMENT_TARGET = 26.0;
 				MTL_ENABLE_DEBUG_INFO = INCLUDE_SOURCE;
 				ONLY_ACTIVE_ARCH = YES;
 				SWIFT_ACTIVE_COMPILATION_CONDITIONS = DEBUG;
@@ -347,7 +359,7 @@
 				ENABLE_NS_ASSERTIONS = NO;
 				ENABLE_STRICT_OBJC_MSGSEND = YES;
 				GCC_OPTIMIZATION_LEVEL = s;
-				IPHONEOS_DEPLOYMENT_TARGET = 15.0;
+				IPHONEOS_DEPLOYMENT_TARGET = 26.0;
 				MTL_ENABLE_DEBUG_INFO = NO;
 				SWIFT_COMPILATION_MODE = wholemodule;
 				SWIFT_OPTIMIZATION_LEVEL = "-O";

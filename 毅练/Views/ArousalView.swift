@@ -4,9 +4,10 @@ import SwiftUI
 struct ArousalView: View {
     let onAroused: () -> Void
     let onExit: () -> Void
+
     var body: some View {
         ZStack {
-            Color.ylBackground.ignoresSafeArea()
+            LinearGradient.ylDark.ignoresSafeArea()
             WarmGlow()
             VStack(spacing: 28) {
                 Spacer()
@@ -20,15 +21,7 @@ struct ArousalView: View {
                     .foregroundColor(.ylTextSecondary)
                 Spacer()
                 VStack(spacing: 16) {
-                    Button(action: onAroused) {
-                        Text("我已勃起，开始训练")
-                            .font(.system(size: 20, weight: .semibold))
-                            .frame(maxWidth: .infinity)
-                            .frame(height: 56)
-                            .background(Color.orange)
-                            .foregroundColor(.white)
-                            .cornerRadius(24)
-                    }
+                    CoachButton(title: "我已勃起，开始训练", style: .primary) { onAroused() }
                     Button(action: onExit) {
                         Text("退出训练")
                             .font(.system(size: 15))
