@@ -72,6 +72,7 @@ jobs:
             ENABLE_BITCODE=NO \
             SWIFT_ENABLE_EXPLICIT_MODULES=NO \
             _EXPERIMENTAL_SWIFT_EXPLICIT_MODULES=NO \
+            SWIFT_COMPILATION_MODE=singlefile \
             | tee build.log
           BUILD_RC=${PIPESTATUS[0]}
           if [ "$BUILD_RC" -ne 0 ]; then
@@ -80,6 +81,8 @@ jobs:
             grep -E "error:|fatal error:" build.log | head -40 | while read -r line; do echo "::error::$line"; done
             echo "---------- failed build commands ----------"
             grep -A 40 "The following build commands failed" build.log | head -60
+            echo "---------- build.log tail (last 120 lines) ----------"
+            tail -n 120 build.log
             exit 1
           fi
           echo "========== BUILD SUCCEEDED =========="
